@@ -29,8 +29,10 @@ type Collect struct {
 }
 
 type CollectOptions struct {
-	Limit int `url:"limit,omitempty"`
-	Page  int `url:"page,omitempty"`
+	Limit        int    `url:"limit,omitempty"`
+	Page         int    `url:"page,omitempty"`
+	CollectionID string `url:"collection_id,omitempty"`
+	ProductID    string `url:"product_id,omitempty"`
 }
 
 func (api *API) NewCollect() *Collect {
