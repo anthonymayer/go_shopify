@@ -2,40 +2,41 @@ package shopify
 
 import (
 	"bytes"
-
 	"encoding/json"
-
 	"fmt"
-
 	"time"
 )
 
 type Blog struct {
-	Commentable string `json:"commentable"`
-
-	CreatedAt time.Time `json:"created_at"`
-
-	Feedburner string `json:"feedburner"`
-
-	FeedburnerLocation string `json:"feedburner_location"`
-
-	Handle string `json:"handle"`
-
-	Id int64 `json:"id"`
-
-	TemplateSuffix string `json:"template_suffix"`
-
-	Title string `json:"title"`
-
-	UpdatedAt time.Time `json:"updated_at"`
-
-	Tags string `json:"tags"`
+	Commentable        string    `json:"commentable"`
+	CreatedAt          time.Time `json:"created_at"`
+	Feedburner         string    `json:"feedburner"`
+	FeedburnerLocation string    `json:"feedburner_location"`
+	Handle             string    `json:"handle"`
+	ID                 int64     `json:"id"`
+	TemplateSuffix     string    `json:"template_suffix"`
+	Title              string    `json:"title"`
+	UpdatedAt          time.Time `json:"updated_at"`
+	Tags               string    `json:"tags"`
 
 	api *API
 }
 
+type BlogOptions struct {
+	Handle  string `url:"handle,omitempty"`
+	Limit   int    `url:"limit,omitempty"`
+	Page    int    `url:"page,omitempty"`
+	SinceID string `url:"since_id,omitempty"`
+}
+
 func (api *API) Blogs() ([]Blog, error) {
-	res, status, err := api.request("/admin/blogs.json", "GET", nil, nil)
+	return api.BlogsWithOptions(&BlogOptions{})
+}
+
+func (api *API) BlogsWithOptions(options *BlogOptions) ([]Blog, error) {
+	qs := encodeOptions(options)
+	endpoint := fmt.Sprintf("/admin/blogs.json?%v", qs)
+	res, status, err := api.request(endpoint, "GET", nil, nil)
 
 	if err != nil {
 		return nil, err
@@ -93,11 +94,11 @@ func (api *API) NewBlog() *Blog {
 }
 
 func (obj *Blog) Save() error {
-	endpoint := fmt.Sprintf("/admin/blogs/%d.json", obj.Id)
+	endpoint := fmt.Sprintf("/admin/blogs/%d.json", obj.ID)
 	method := "PUT"
 	expectedStatus := 201
 
-	if obj.Id == 0 {
+	if obj.ID == 0 {
 		endpoint = fmt.Sprintf("/admin/blogs.json")
 		method = "POST"
 		expectedStatus = 201
@@ -124,9 +125,10 @@ func (obj *Blog) Save() error {
 		err = json.NewDecoder(res).Decode(&r)
 		if err == nil {
 			return fmt.Errorf("Status %d: %v", status, r.Errors)
-		} else {
-			return fmt.Errorf("Status %d, and error parsing body: %s", status, err)
 		}
+
+		return fmt.Errorf("Status %d, and error parsing body: %s", status, err)
+
 	}
 
 	r := map[string]Blog{}
