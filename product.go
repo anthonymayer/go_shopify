@@ -5,8 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/google/go-querystring/query"
 	"strconv"
+
+	"github.com/google/go-querystring/query"
 )
 
 type Product struct {
@@ -70,8 +71,11 @@ func (api *API) Products(options *ProductsOptions) ([]*Product, error) {
 	}
 
 	result := (*r)["products"]
-	for _, v := range result {
-		v.api = api
+	for _, p := range result {
+		p.api = api
+		for i := range p.Variants {
+			p.Variants[i].api = api
+		}
 	}
 
 	return result, nil
@@ -146,7 +150,7 @@ func (api *API) NewProduct() *Product {
 	return &Product{api: api}
 }
 
-type ProductsMetafieldsOptions struct {
+type MetafieldsOptions struct {
 	Limit        int    `url:"limit,omitempty"`
 	SinceID      string `url:"since_id,omitempty"`
 	CreatedAtMin string `url:"created_at_min,omitempty"`
@@ -159,7 +163,7 @@ type ProductsMetafieldsOptions struct {
 	Fields       string `url:"fields,omitempty"`
 }
 
-func (obj *Product) Metafields(options *ProductsMetafieldsOptions) ([]*Metafield, error) {
+func (obj *Product) Metafields(options *MetafieldsOptions) ([]*Metafield, error) {
 	if obj == nil || obj.api == nil {
 		return nil, errors.New("Product is nil")
 	}

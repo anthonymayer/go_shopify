@@ -2,26 +2,24 @@ package shopify
 
 import (
 	"bytes"
-
 	"encoding/json"
-
 	"fmt"
-
 	"time"
 )
 
 type Metafield struct {
 	CreatedAt     time.Time `json:"created_at"`
 	Description   string    `json:"description"`
-	Id            int64     `json:"id"`
+	ID            int64     `json:"id"`
 	Key           string    `json:"key"`
 	Namespace     string    `json:"namespace"`
-	OwnerId       int64     `json:"owner_id"`
+	OwnerID       int64     `json:"owner_id"`
 	UpdatedAt     time.Time `json:"updated_at"`
 	Value         string    `json:"value"`
 	ValueType     string    `json:"value_type"`
 	OwnerResource string    `json:"owner_resource"`
-	api           *API
+
+	api *API
 }
 
 func (api *API) Metafields() ([]*Metafield, error) {
@@ -83,11 +81,11 @@ func (api *API) NewMetafield() *Metafield {
 }
 
 func (obj *Metafield) Save() error {
-	endpoint := fmt.Sprintf("/admin/metafields/%d.json", obj.Id)
+	endpoint := fmt.Sprintf("/admin/metafields/%d.json", obj.ID)
 	method := "PUT"
 	expectedStatus := 201
 
-	if obj.Id == 0 {
+	if obj.ID == 0 {
 		endpoint = fmt.Sprintf("/admin/metafields.json")
 		method = "POST"
 		expectedStatus = 201
@@ -133,13 +131,13 @@ func (obj *Metafield) Save() error {
 	return nil
 }
 
-func (obj *Metafield) SaveForProduct(productId int64) error {
-	endpoint := fmt.Sprintf("/admin/products/%d/metafields/%d.json", productId, obj.Id)
+func (obj *Metafield) SaveForProduct(productID int64) error {
+	endpoint := fmt.Sprintf("/admin/products/%d/metafields/%d.json", productID, obj.ID)
 	method := "PUT"
 	expectedStatus := 200
 
-	if obj.Id == 0 {
-		endpoint = fmt.Sprintf("/admin/products/%d/metafields.json", productId)
+	if obj.ID == 0 {
+		endpoint = fmt.Sprintf("/admin/products/%d/metafields.json", productID)
 		method = "POST"
 		expectedStatus = 201
 	}
