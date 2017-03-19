@@ -12,6 +12,7 @@ type Article struct {
 	BlogID         int64     `json:"blog_id"`
 	BodyHTML       string    `json:"body_html"`
 	CreatedAt      time.Time `json:"created_at"`
+	Handle         string    `json:"handle,omitempty"`
 	ID             int64     `json:"id"`
 	PublishedAt    time.Time `json:"published_at"`
 	SummaryHTML    string    `json:"summary_html"`
