@@ -37,6 +37,7 @@ type ArticleOptions struct {
 	PublishedAtMin  string `url:"published_at_min,omitempty"`
 	PublishedAtMax  string `url:"published_at_max,omitempty"`
 	PublishedStatus string `url:"published_status,omitempty"`
+	Order           string `url:"order,omitempty"`
 	SinceID         string `url:"since_id,omitempty"`
 	Tag             string `url:"tag,omitempty"`
 }
