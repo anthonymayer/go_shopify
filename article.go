@@ -74,6 +74,35 @@ func (api *API) ArticlesWithOptions(options *ArticleOptions) ([]Article, error) 
 	return result, nil
 }
 
+func (api *API) BlogArticlesWithOptions(blogID int64, options *ArticleOptions) ([]Article, error) {
+	qs := encodeOptions(options)
+	endpoint := fmt.Sprintf("/admin/blogs/%d/articles.json?%v", blogID, qs)
+	res, status, err := api.request(endpoint, "GET", nil, nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if status != 200 {
+		return nil, fmt.Errorf("Status returned: %d", status)
+	}
+
+	r := &map[string][]Article{}
+	err = json.NewDecoder(res).Decode(r)
+
+	result := (*r)["articles"]
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range result {
+		v.api = api
+	}
+
+	return result, nil
+}
+
 func (api *API) Article(id int64) (*Article, error) {
 	endpoint := fmt.Sprintf("/admin/articles/%d.json", id)
 
