@@ -8,19 +8,20 @@ import (
 )
 
 type Article struct {
-	Author         string    `json:"author"`
-	BlogID         int64     `json:"blog_id"`
-	BodyHTML       string    `json:"body_html"`
-	CreatedAt      time.Time `json:"created_at"`
-	Handle         string    `json:"handle,omitempty"`
-	ID             int64     `json:"id"`
-	PublishedAt    time.Time `json:"published_at"`
-	SummaryHTML    string    `json:"summary_html"`
-	TemplateSuffix string    `json:"template_suffix"`
-	Title          string    `json:"title"`
-	UpdatedAt      time.Time `json:"updated_at"`
-	UserID         int64     `json:"user_id"`
-	Tags           string    `json:"tags"`
+	Author         string       `json:"author"`
+	BlogID         int64        `json:"blog_id"`
+	BodyHTML       string       `json:"body_html"`
+	CreatedAt      time.Time    `json:"created_at"`
+	Handle         string       `json:"handle,omitempty"`
+	ID             int64        `json:"id"`
+	Image          articleImage `json:"image,omitempty"`
+	PublishedAt    time.Time    `json:"published_at"`
+	SummaryHTML    string       `json:"summary_html"`
+	TemplateSuffix string       `json:"template_suffix"`
+	Title          string       `json:"title"`
+	UpdatedAt      time.Time    `json:"updated_at"`
+	UserID         int64        `json:"user_id"`
+	Tags           string       `json:"tags"`
 
 	api *API
 }
@@ -40,6 +41,11 @@ type ArticleOptions struct {
 	Order           string `url:"order,omitempty"`
 	SinceID         string `url:"since_id,omitempty"`
 	Tag             string `url:"tag,omitempty"`
+}
+
+type articleImage struct {
+	Src       string `json:"src,omitempty"`
+	CreatedAt string `json:"created_at,omitempty`
 }
 
 func (api *API) Articles() ([]Article, error) {
