@@ -157,7 +157,7 @@ type MetafieldsOptions struct {
 	CreatedAtMax string `url:"created_at_max,omitempty"`
 	UpdatedAtMin string `url:"updated_at_min,omitempty"`
 	UpdatedAtMax string `url:"updated_at_max,omitempty"`
-	Namepace     string `url:"namepace,omitempty"`
+	Namespace    string `url:"namespace,omitempty"`
 	Key          string `url:"key,omitempty"`
 	ValueType    string `url:"value_type,omitempty"`
 	Fields       string `url:"fields,omitempty"`
