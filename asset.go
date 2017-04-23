@@ -59,9 +59,9 @@ func (api *API) Assets(themeId int64) ([]Asset, error) {
 func (api *API) Asset(themeId int64, assetKey string) (*Asset, error) {
 	var endpoint string
 	if themeId == 0 {
-		endpoint = fmt.Sprintf("/admin/assets.json?asset=%s", assetKey)
+		endpoint = fmt.Sprintf("/admin/assets.json?asset[key]=%s", assetKey)
 	} else {
-		endpoint = fmt.Sprintf("/admin/themes/%d/assets.json?asset=%s&theme_id=%d", themeId, assetKey, themeId)
+		endpoint = fmt.Sprintf("/admin/themes/%d/assets.json?asset[key]=%s&theme_id=%d", themeId, assetKey, themeId)
 	}
 
 	res, status, err := api.request(endpoint, "GET", nil, nil)
@@ -95,7 +95,7 @@ func (api *API) NewAsset() *Asset {
 }
 
 func (obj *Asset) Save() error {
-	endpoint := fmt.Sprintf("/admin/themes/%d/asset.json?asset=%s&theme_id=%d", obj.ThemeId, obj.Key, obj.ThemeId)
+	endpoint := fmt.Sprintf("/admin/themes/%d/asset.json?asset[key]=%s&theme_id=%d", obj.ThemeId, obj.Key, obj.ThemeId)
 	method := "PUT"
 	expectedStatus := 201
 
