@@ -167,9 +167,13 @@ func (obj *Product) Metafields(options *MetafieldsOptions) ([]*Metafield, error)
 	if obj == nil || obj.api == nil {
 		return nil, errors.New("Product is nil")
 	}
+	return obj.api.ProductMetafields(obj.ID, options)
+}
+
+func (api *API) ProductMetafields(productID int64, options *MetafieldsOptions) ([]*Metafield, error) {
 	qs := encodeOptions(options)
-	endpoint := fmt.Sprintf("/admin/products/%d/metafields.json?%v", obj.ID, qs)
-	res, status, err := obj.api.request(endpoint, "GET", nil, nil)
+	endpoint := fmt.Sprintf("/admin/products/%d/metafields.json?%v", productID, qs)
+	res, status, err := api.request(endpoint, "GET", nil, nil)
 
 	if err != nil {
 		return nil, err
@@ -189,7 +193,7 @@ func (obj *Product) Metafields(options *MetafieldsOptions) ([]*Metafield, error)
 	}
 
 	for _, v := range result {
-		v.api = obj.api
+		v.api = api
 	}
 
 	return result, nil
