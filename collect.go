@@ -2,28 +2,20 @@ package shopify
 
 import (
 	"encoding/json"
-
 	"fmt"
-
+	"strconv"
 	"time"
 )
 
 type Collect struct {
-	CollectionId int64 `json:"collection_id"`
-
-	CreatedAt time.Time `json:"created_at"`
-
-	Featured bool `json:"featured"`
-
-	Id int64 `json:"id"`
-
-	Position int64 `json:"position"`
-
-	ProductId int64 `json:"product_id"`
-
-	UpdatedAt time.Time `json:"updated_at"`
-
-	SortValue string `json:"sort_value"`
+	CollectionId int64     `json:"collection_id"`
+	CreatedAt    time.Time `json:"created_at"`
+	Featured     bool      `json:"featured"`
+	Id           int64     `json:"id"`
+	Position     int64     `json:"position"`
+	ProductId    int64     `json:"product_id"`
+	UpdatedAt    time.Time `json:"updated_at"`
+	SortValue    string    `json:"sort_value"`
 
 	api *API
 }
@@ -95,4 +87,34 @@ func (api *API) Collect(id int64) (*Collect, error) {
 	result.api = api
 
 	return &result, nil
+}
+
+type CollectsCountOptions struct {
+	CollectionID string `url:"collection_id,omitempty"`
+	ProductID    string `url:"product_id,omitempty"`
+}
+
+func (api *API) CollectsCount(options *CollectsCountOptions) (int, error) {
+
+	qs := encodeOptions(options)
+	endpoint := fmt.Sprintf("/admin/collects/count.json?%v", qs)
+
+	res, status, err := api.request(endpoint, "GET", nil, nil)
+
+	if err != nil {
+		return 0, err
+	}
+
+	if status != 200 {
+		return 0, fmt.Errorf("Status returned: %d", status)
+	}
+
+	r := map[string]interface{}{}
+	err = json.NewDecoder(res).Decode(&r)
+
+	result, _ := strconv.Atoi(fmt.Sprintf("%v", r["count"]))
+	if err != nil {
+		return 0, err
+	}
+	return result, nil
 }
