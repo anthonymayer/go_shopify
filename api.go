@@ -23,7 +23,11 @@ type API struct {
 	Secret       string // API client secret for this shop
 	RetryLimit   int
 	LogRetryFail bool
-	client       *http.Client
+
+	// map[endpoint:method]response
+	RequestCache RequestCache
+
+	client *http.Client
 
 	callLimit  int
 	callsMade  int
@@ -35,7 +39,17 @@ type errorResponse struct {
 	Errors map[string]interface{} `json:"errors"`
 }
 
+type RequestCache interface {
+	Contains(string) bool
+	Get(string) *bytes.Buffer
+	Set(string, *bytes.Buffer)
+}
+
 func (api *API) request(endpoint string, method string, params map[string]interface{}, body io.Reader) (result *bytes.Buffer, status int, err error) {
+	if api.RequestCache != nil && api.RequestCache.Contains(endpoint+":"+method) {
+		// make a copy so that the original object doesn't get emptied
+		return bytes.NewBuffer(api.RequestCache.Get(endpoint + ":" + method).Bytes()), 200, nil
+	}
 	if api.client == nil {
 		api.client = &http.Client{}
 	}
@@ -100,6 +114,13 @@ func (api *API) request(endpoint string, method string, params map[string]interf
 	defer resp.Body.Close()
 	if _, err = io.Copy(result, resp.Body); err != nil {
 		return
+	}
+	if result.Len() > 0 &&
+		status == 200 &&
+		params == nil &&
+		body == nil &&
+		api.RequestCache != nil {
+		api.RequestCache.Set(endpoint+":"+method, bytes.NewBuffer(result.Bytes()))
 	}
 	return
 }
