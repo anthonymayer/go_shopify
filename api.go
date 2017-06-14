@@ -17,11 +17,13 @@ const BUCKET_LIMIT = 40
 const MAX_RETRIES = 3
 
 type API struct {
-	Shop        string // for e.g. demo-3.myshopify.com
-	AccessToken string // permanent store access token
-	Token       string // API client token
-	Secret      string // API client secret for this shop
-	client      *http.Client
+	Shop         string // for e.g. demo-3.myshopify.com
+	AccessToken  string // permanent store access token
+	Token        string // API client token
+	Secret       string // API client secret for this shop
+	RetryLimit   int
+	LogRetryFail bool
+	client       *http.Client
 
 	callLimit  int
 	callsMade  int
@@ -73,12 +75,23 @@ func (api *API) request(endpoint string, method string, params map[string]interf
 
 	status = resp.StatusCode
 	if status == 429 { // statusTooManyRequests
-		if api.retryCount < MAX_RETRIES {
+		if api.RetryLimit == 0 {
+			api.RetryLimit = MAX_RETRIES
+		}
+		if api.retryCount < api.RetryLimit {
 			api.retryCount = api.retryCount + 1
 			b := api.backoff.Duration()
 			time.Sleep(b)
 			// try again
 			return api.request(endpoint, method, params, body)
+		}
+		if api.LogRetryFail {
+			fmt.Println(
+				"shopify api retry failed",
+				"shop:", api.Shop,
+				"calls made:", calls,
+				"call limit:", total,
+			)
 		}
 		// else just return
 	}
