@@ -51,7 +51,6 @@ type ProductsOptions struct {
 }
 
 func (api *API) Products(options *ProductsOptions) ([]*Product, error) {
-
 	qs := encodeOptions(options)
 	endpoint := fmt.Sprintf("/admin/products.json?%v", qs)
 	res, status, err := api.request(endpoint, "GET", nil, nil)

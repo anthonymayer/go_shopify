@@ -22,8 +22,10 @@ type Metafield struct {
 	api *API
 }
 
-func (api *API) Metafields() ([]*Metafield, error) {
-	res, status, err := api.request("/admin/metafields.json", "GET", nil, nil)
+func (api *API) MetafieldsWithOptions(options *MetafieldsOptions) ([]*Metafield, error) {
+	qs := encodeOptions(options)
+	endpoint := fmt.Sprintf("/admin/metafields.json?%v", qs)
+	res, status, err := api.request(endpoint, "GET", nil, nil)
 
 	if err != nil {
 		return nil, err
@@ -47,6 +49,10 @@ func (api *API) Metafields() ([]*Metafield, error) {
 	}
 
 	return result, nil
+}
+
+func (api *API) Metafields() ([]*Metafield, error) {
+	return api.MetafieldsWithOptions(&MetafieldsOptions{})
 }
 
 func (api *API) Metafield(id int64) (*Metafield, error) {
