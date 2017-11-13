@@ -9,16 +9,17 @@ import (
 
 type Page struct {
 	Author         string    `json:"author"`
-	BodyHtml       string    `json:"body_html"`
+	BodyHTML       string    `json:"body_html"`
 	CreatedAt      time.Time `json:"created_at"`
 	Handle         string    `json:"handle"`
-	Id             int64     `json:"id"`
+	ID             int64     `json:"id"`
 	PublishedAt    time.Time `json:"published_at"`
-	ShopId         int64     `json:"shop_id"`
+	ShopID         int64     `json:"shop_id"`
 	TemplateSuffix string    `json:"template_suffix"`
 	Title          string    `json:"title"`
 	UpdatedAt      time.Time `json:"updated_at"`
-	api            *API
+
+	api *API
 }
 
 type PageOptions struct {
@@ -102,11 +103,11 @@ func (api *API) NewPage() *Page {
 }
 
 func (obj *Page) Save() error {
-	endpoint := fmt.Sprintf("/admin/pages/%d.json", obj.Id)
+	endpoint := fmt.Sprintf("/admin/pages/%d.json", obj.ID)
 	method := "PUT"
 	expectedStatus := 201
 
-	if obj.Id == 0 {
+	if obj.ID == 0 {
 		endpoint = fmt.Sprintf("/admin/pages.json")
 		method = "POST"
 		expectedStatus = 201
