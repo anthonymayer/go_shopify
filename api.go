@@ -48,7 +48,10 @@ type RequestCache interface {
 func (api *API) request(endpoint string, method string, params map[string]interface{}, body io.Reader) (result *bytes.Buffer, status int, err error) {
 	if api.RequestCache != nil && api.RequestCache.Contains(endpoint+":"+method) {
 		// make a copy so that the original object doesn't get emptied
-		return bytes.NewBuffer(api.RequestCache.Get(endpoint + ":" + method).Bytes()), 200, nil
+		cachedBuffer := api.RequestCache.Get(endpoint + ":" + method)
+		if cachedBuffer.Len() > 0 {
+			return bytes.NewBuffer(cachedBuffer.Bytes()), 200, nil
+		}
 	}
 	if api.client == nil {
 		api.client = &http.Client{}
