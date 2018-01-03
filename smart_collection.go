@@ -39,11 +39,17 @@ type SmartCollection struct {
 }
 
 type CollectionOptions struct {
-	Handle    string `url:"handle,omitempty"`
-	IDs       string `url:"ids,omitempty"`
-	Limit     int    `url:"limit,omitempty"`
-	Page      int    `url:"page,omitempty"`
-	ProductID string `url:"product_id,omitempty"`
+	Handle          string `url:"handle,omitempty"`
+	IDs             string `url:"ids,omitempty"`
+	Limit           int    `url:"limit,omitempty"`
+	Page            int    `url:"page,omitempty"`
+	ProductID       string `url:"product_id,omitempty"`
+	UpdatedAtMin    string `url:"updated_at_min,omitempty"`
+	UpdatedAtMax    string `url:"updated_at_max,omitempty"`
+	PublishedAtMin  string `url:"published_at_min,omitempty"`
+	PublishedAtMax  string `url:"published_at_max,omitempty"`
+	PublishedStatus string `url:"published_status,omitempty"`
+	Title           string `url:"title,omitempty"`
 }
 
 func (api *API) SmartCollections() ([]SmartCollection, error) {
