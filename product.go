@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/google/go-querystring/query"
+	"github.com/json-iterator/go"
 )
 
 type Product struct {
@@ -64,7 +65,7 @@ func (api *API) Products(options *ProductsOptions) ([]*Product, error) {
 	}
 
 	r := &map[string][]*Product{}
-	err = json.NewDecoder(res).Decode(r)
+	err = jsoniter.ConfigCompatibleWithStandardLibrary.NewDecoder(res).Decode(r)
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +110,7 @@ func (api *API) ProductsCount(options *ProductsCountOptions) (int, error) {
 	}
 
 	r := map[string]interface{}{}
-	err = json.NewDecoder(res).Decode(&r)
+	err = jsoniter.ConfigCompatibleWithStandardLibrary.NewDecoder(res).Decode(&r)
 
 	result, _ := strconv.Atoi(fmt.Sprintf("%v", r["count"]))
 	if err != nil {
@@ -132,7 +133,7 @@ func (api *API) Product(id int64) (*Product, error) {
 	}
 
 	r := map[string]Product{}
-	err = json.NewDecoder(res).Decode(&r)
+	err = jsoniter.ConfigCompatibleWithStandardLibrary.NewDecoder(res).Decode(&r)
 
 	result := r["product"]
 
@@ -183,7 +184,7 @@ func (api *API) ProductMetafields(productID int64, options *MetafieldsOptions) (
 	}
 
 	r := map[string][]*Metafield{}
-	err = json.NewDecoder(res).Decode(&r)
+	err = jsoniter.ConfigCompatibleWithStandardLibrary.NewDecoder(res).Decode(&r)
 
 	result := r["metafields"]
 
@@ -285,13 +286,13 @@ func (obj *Product) Save(partial *Product) error {
 		err = json.NewDecoder(res).Decode(&r)
 		if err == nil {
 			return fmt.Errorf("Status %d: %v", status, r.Errors)
-		} else {
-			return fmt.Errorf("Status %d, and error parsing body: %s", status, err)
 		}
+
+		return fmt.Errorf("Status %d, and error parsing body: %s", status, err)
 	}
 
 	r := map[string]Product{}
-	err = json.NewDecoder(res).Decode(&r)
+	err = jsoniter.ConfigCompatibleWithStandardLibrary.NewDecoder(res).Decode(&r)
 
 	if err != nil {
 		return err
@@ -317,12 +318,12 @@ func (obj *Product) Delete() error {
 
 	if status != expectedStatus {
 		r := errorResponse{}
-		err = json.NewDecoder(res).Decode(&r)
+		err = jsoniter.ConfigCompatibleWithStandardLibrary.NewDecoder(res).Decode(&r)
 		if err == nil {
 			return fmt.Errorf("Status %d: %v", status, r.Errors)
-		} else {
-			return fmt.Errorf("Status %d, and error parsing body: %s", status, err)
 		}
+
+		return fmt.Errorf("Status %d, and error parsing body: %s", status, err)
 	}
 
 	return nil

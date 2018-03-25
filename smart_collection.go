@@ -11,29 +11,18 @@ import (
 )
 
 type SmartCollection struct {
-	BodyHTML string `json:"body_html"`
-
-	Disjunctive bool `json:"disjunctive"`
-
-	Handle string `json:"handle"`
-
-	ID int64 `json:"id"`
-
-	Image interface{} `json:"image,omitempty"`
-
-	PublishedAt *time.Time `json:"published_at,omitempty"`
-
-	PublishedScope string `json:"published_scope"`
-
-	SortOrder string `json:"sort_order"`
-
-	TemplateSuffix string `json:"template_suffix"`
-
-	Title string `json:"title"`
-
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
-
-	Rules []Rule `json:"rules"`
+	BodyHTML       string      `json:"body_html"`
+	Disjunctive    bool        `json:"disjunctive"`
+	Handle         string      `json:"handle"`
+	ID             int64       `json:"id"`
+	Image          interface{} `json:"image,omitempty"`
+	PublishedAt    *time.Time  `json:"published_at,omitempty"`
+	PublishedScope string      `json:"published_scope"`
+	SortOrder      string      `json:"sort_order"`
+	TemplateSuffix string      `json:"template_suffix"`
+	Title          string      `json:"title"`
+	UpdatedAt      *time.Time  `json:"updated_at,omitempty"`
+	Rules          []Rule      `json:"rules"`
 
 	api *API
 }
