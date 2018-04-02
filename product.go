@@ -65,7 +65,7 @@ func (api *API) Products(options *ProductsOptions) ([]*Product, error) {
 	}
 
 	r := &map[string][]*Product{}
-	err = jsoniter.ConfigCompatibleWithStandardLibrary.NewDecoder(res).Decode(r)
+	err = jsoniter.ConfigFastest.NewDecoder(res).Decode(r)
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +110,7 @@ func (api *API) ProductsCount(options *ProductsCountOptions) (int, error) {
 	}
 
 	r := map[string]interface{}{}
-	err = jsoniter.ConfigCompatibleWithStandardLibrary.NewDecoder(res).Decode(&r)
+	err = jsoniter.ConfigFastest.NewDecoder(res).Decode(&r)
 
 	result, _ := strconv.Atoi(fmt.Sprintf("%v", r["count"]))
 	if err != nil {
@@ -133,7 +133,7 @@ func (api *API) Product(id int64) (*Product, error) {
 	}
 
 	r := map[string]Product{}
-	err = jsoniter.ConfigCompatibleWithStandardLibrary.NewDecoder(res).Decode(&r)
+	err = jsoniter.ConfigFastest.NewDecoder(res).Decode(&r)
 
 	result := r["product"]
 
@@ -184,7 +184,7 @@ func (api *API) ProductMetafields(productID int64, options *MetafieldsOptions) (
 	}
 
 	r := map[string][]*Metafield{}
-	err = jsoniter.ConfigCompatibleWithStandardLibrary.NewDecoder(res).Decode(&r)
+	err = jsoniter.ConfigFastest.NewDecoder(res).Decode(&r)
 
 	result := r["metafields"]
 
@@ -292,7 +292,7 @@ func (obj *Product) Save(partial *Product) error {
 	}
 
 	r := map[string]Product{}
-	err = jsoniter.ConfigCompatibleWithStandardLibrary.NewDecoder(res).Decode(&r)
+	err = jsoniter.ConfigFastest.NewDecoder(res).Decode(&r)
 
 	if err != nil {
 		return err
@@ -318,7 +318,7 @@ func (obj *Product) Delete() error {
 
 	if status != expectedStatus {
 		r := errorResponse{}
-		err = jsoniter.ConfigCompatibleWithStandardLibrary.NewDecoder(res).Decode(&r)
+		err = jsoniter.ConfigFastest.NewDecoder(res).Decode(&r)
 		if err == nil {
 			return fmt.Errorf("Status %d: %v", status, r.Errors)
 		}
