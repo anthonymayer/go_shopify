@@ -51,7 +51,7 @@ type ProductsOptions struct {
 	Fields          string `url:"fields,omitempty"`
 }
 
-func (api *API) Products(options *ProductsOptions) ([]*Product, error) {
+func (api *API) Products(options *ProductsOptions) ([]Product, error) {
 	qs := encodeOptions(options)
 	endpoint := fmt.Sprintf("/admin/products.json?%v", qs)
 	res, status, err := api.request(endpoint, "GET", nil, nil)
@@ -64,7 +64,7 @@ func (api *API) Products(options *ProductsOptions) ([]*Product, error) {
 		return nil, fmt.Errorf("Status returned: %d", status)
 	}
 
-	r := &map[string][]*Product{}
+	r := &map[string][]Product{}
 	err = jsoniter.ConfigFastest.NewDecoder(res).Decode(r)
 	if err != nil {
 		return nil, err
