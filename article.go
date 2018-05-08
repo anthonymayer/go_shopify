@@ -4,7 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"time"
+
+	jsoniter "github.com/json-iterator/go"
 )
 
 type Article struct {
@@ -107,6 +110,41 @@ func (api *API) BlogArticlesWithOptions(blogID int64, options *ArticleOptions) (
 		v.api = api
 	}
 
+	return result, nil
+}
+
+type BlogArticlesCountOptions struct {
+	CreatedAtMin    string `url:"created_at_min,omitempty"`
+	CreatedAtMax    string `url:"created_at_max,omitempty"`
+	UpdatedAtMin    string `url:"updated_at_min,omitempty"`
+	UpdatedAtMax    string `url:"updated_at_max,omitempty"`
+	PublishedAtMin  string `url:"published_at_min,omitempty"`
+	PublishedAtMax  string `url:"published_at_max,omitempty"`
+	PublishedStatus string `url:"published_status,omitempty"`
+}
+
+func (api *API) BlogArticlesCount(blogID int64, options *BlogArticlesCountOptions) (int, error) {
+
+	qs := encodeOptions(options)
+	endpoint := fmt.Sprintf("/admin/blogs/%d/articles/count.json?%v", blogID, qs)
+
+	res, status, err := api.request(endpoint, "GET", nil, nil)
+
+	if err != nil {
+		return 0, err
+	}
+
+	if status != 200 {
+		return 0, fmt.Errorf("Status returned: %d", status)
+	}
+
+	r := map[string]interface{}{}
+	err = jsoniter.ConfigFastest.NewDecoder(res).Decode(&r)
+
+	result, _ := strconv.Atoi(fmt.Sprintf("%v", r["count"]))
+	if err != nil {
+		return 0, err
+	}
 	return result, nil
 }
 
