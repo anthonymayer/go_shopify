@@ -2,6 +2,9 @@ package shopify
 
 import (
 	"bytes"
+	"crypto/md5"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,9 +15,7 @@ import (
 	"github.com/jpillora/backoff"
 )
 
-const REFILL_RATE = float64(0.5) // 2 per second
-const BUCKET_LIMIT = 40
-const MAX_RETRIES = 3
+var defaultConfig = DefaultConfig()
 
 type API struct {
 	Shop         string // for e.g. demo-3.myshopify.com
@@ -35,8 +36,20 @@ type API struct {
 	retryCount int
 }
 
-type errorResponse struct {
-	Errors map[string]interface{} `json:"errors"`
+// ErrorResponse is returned when an unexpected HTTP status code is received.
+type ErrorResponse struct {
+	// Errors is either a map of errors or a single error string returned
+	// in the HTTP response, if it was possible to decode the response as JSON.
+	Errors interface{} `json:"errors"`
+	// StatusCode is the HTTP status code served in the response.
+	StatusCode int `json:"-"`
+	// ReqBody is the HTTP request body.
+	ReqBody []byte `json:"-"`
+	// Body is the HTTP response body.
+	Body []byte `json:"-"`
+	// BodyErr is any encoding/json error that occurred while trying to
+	// unmarshal into the Errors field.
+	BodyErr error `json:"-"`
 }
 
 type RequestCache interface {
@@ -56,16 +69,35 @@ func (api *API) request(endpoint string, method string, params map[string]interf
 	if api.client == nil {
 		api.client = &http.Client{}
 	}
+	if len(e.Body) > 0 {
+		ret += "; response body: " + string(e.Body)
+	}
+	return ret
+}
+
+// Temporary returns true when the status code indicates that an error is probably
+// temporary.
+func (e *ErrorResponse) Temporary() bool {
+	return e.StatusCode >= 500 || e.StatusCode == http.StatusTooManyRequests
+}
+
+func (api *API) request(endpoint string, method string, params map[string]interface{}, body *bytes.Buffer) (result *bytes.Buffer, status int, err error) {
 	if api.backoff == nil {
 		api.backoff = &backoff.Backoff{
-			//These are the defaults
-			Min:    100 * time.Millisecond,
-			Max:    2 * time.Second,
+			Min:    defaultConfig.MinBackoffValue,
+			Max:    defaultConfig.MaxBackoffValue,
 			Jitter: true,
 		}
 	}
 	if api.callLimit == 0 {
-		api.callLimit = BUCKET_LIMIT
+		api.callLimit = defaultConfig.BucketLimit
+	}
+
+	// Keep a copy of body so that we can use it when retrying.
+	var bodyBackup *bytes.Buffer
+	if body != nil {
+		bodyBackup = new(bytes.Buffer)
+		*bodyBackup = *body
 	}
 
 	uri := fmt.Sprintf("https://%s%s", api.Shop, endpoint)
@@ -74,17 +106,20 @@ func (api *API) request(endpoint string, method string, params map[string]interf
 		return
 	}
 
-	if api.AccessToken != "" {
+	if api.Secret == "" {
 		req.Header.Set("X-Shopify-Access-Token", api.AccessToken)
 	} else {
-		req.SetBasicAuth(api.Token, api.Secret)
+		sum := md5.Sum([]byte(api.Secret + api.AccessToken))
+		hexSum := hex.EncodeToString(sum[:])
+		req.SetBasicAuth(api.Token, hexSum)
 	}
 	req.Header.Add("Content-Type", "application/json")
 
-	resp, err := api.client.Do(req)
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return
 	}
+	defer resp.Body.Close()
 
 	calls, total := parseAPICallLimit(resp.Header.Get("HTTP_X_SHOPIFY_SHOP_API_CALL_LIMIT"))
 	api.callsMade = calls
@@ -100,7 +135,7 @@ func (api *API) request(endpoint string, method string, params map[string]interf
 			b := api.backoff.Duration()
 			time.Sleep(b)
 			// try again
-			return api.request(endpoint, method, params, body)
+			return api.request(endpoint, method, params, bodyBackup)
 		}
 		if api.LogRetryFail {
 			fmt.Println(
@@ -114,7 +149,6 @@ func (api *API) request(endpoint string, method string, params map[string]interf
 	}
 
 	result = &bytes.Buffer{}
-	defer resp.Body.Close()
 	if _, err = io.Copy(result, resp.Body); err != nil {
 		return
 	}
