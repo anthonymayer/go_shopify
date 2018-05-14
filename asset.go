@@ -2,42 +2,29 @@ package shopify
 
 import (
 	"bytes"
-
 	"encoding/json"
-
 	"fmt"
 
 	"time"
 )
 
 type Asset struct {
-	Attachment string `json:"attachment"`
-
-	ContentType string `json:"content_type"`
-
-	CreatedAt time.Time `json:"created_at"`
-
-	Key string `json:"key"`
-
-	PublicUrl string `json:"public_url"`
-
-	Size int64 `json:"size"`
-
-	SourceKey string `json:"source_key"`
-
-	Src string `json:"src"`
-
-	ThemeId int64 `json:"theme_id"`
-
-	UpdatedAt time.Time `json:"updated_at"`
-
-	Value string `json:"value"`
+	Attachment  string    `json:"attachment"`
+	ContentType string    `json:"content_type"`
+	CreatedAt   time.Time `json:"created_at"`
+	Key         string    `json:"key"`
+	PublicUrl   string    `json:"public_url"`
+	Size        int64     `json:"size"`
+	SourceKey   string    `json:"source_key"`
+	Src         string    `json:"src"`
+	ThemeId     int64     `json:"theme_id"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	Value       string    `json:"value"`
 
 	api *API
 }
 
 func (api *API) Assets(themeId int64) ([]Asset, error) {
-
 	var endpoint string
 	if themeId == 0 {
 		endpoint = "/admin/assets.json"
@@ -71,7 +58,12 @@ func (api *API) Assets(themeId int64) ([]Asset, error) {
 }
 
 func (api *API) Asset(themeId int64, assetKey string) (*Asset, error) {
-	endpoint := fmt.Sprintf("/admin/themes/%d/assets.json?asset=%s&theme_id=%d", themeId, assetKey, themeId)
+	var endpoint string
+	if themeId == 0 {
+		endpoint = fmt.Sprintf("/admin/assets.json?asset[key]=%s", assetKey)
+	} else {
+		endpoint = fmt.Sprintf("/admin/themes/%d/assets.json?asset[key]=%s&theme_id=%d", themeId, assetKey, themeId)
+	}
 
 	res, status, err := api.request(endpoint, "GET", nil, nil)
 
@@ -102,7 +94,7 @@ func (api *API) NewAsset() *Asset {
 }
 
 func (obj *Asset) Save() error {
-	endpoint := fmt.Sprintf("/admin/themes/%d/asset.json?asset=%s&theme_id=%d", obj.ThemeId, obj.Key, obj.ThemeId)
+	endpoint := fmt.Sprintf("/admin/themes/%d/asset.json?asset[key]=%s&theme_id=%d", obj.ThemeId, obj.Key, obj.ThemeId)
 	method := "PUT"
 	expectedStatus := 201
 
@@ -123,7 +115,13 @@ func (obj *Asset) Save() error {
 	}
 
 	if status != expectedStatus {
-		return newErrorResponse(status, nil, res)
+		r := errorResponse{}
+		err = json.NewDecoder(res).Decode(&r)
+		if err == nil {
+			return fmt.Errorf("Status %d: %v", status, r.Errors)
+		} else {
+			return fmt.Errorf("Status %d, and error parsing body: %s", status, err)
+		}
 	}
 
 	r := map[string]Asset{}

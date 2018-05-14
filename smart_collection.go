@@ -11,39 +11,34 @@ import (
 )
 
 type SmartCollection struct {
-	BodyHTML string `json:"body_html"`
-
-	Disjunctive bool `json:"disjunctive"`
-
-	Handle string `json:"handle"`
-
-	ID int64 `json:"id"`
-
-	Image interface{} `json:"image,omitempty"`
-
-	PublishedAt *time.Time `json:"published_at,omitempty"`
-
-	PublishedScope string `json:"published_scope"`
-
-	SortOrder string `json:"sort_order"`
-
-	TemplateSuffix string `json:"template_suffix"`
-
-	Title string `json:"title"`
-
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
-
-	Rules []Rule `json:"rules"`
+	BodyHTML       string      `json:"body_html"`
+	Disjunctive    bool        `json:"disjunctive"`
+	Handle         string      `json:"handle"`
+	ID             int64       `json:"id"`
+	Image          interface{} `json:"image,omitempty"`
+	PublishedAt    *time.Time  `json:"published_at,omitempty"`
+	PublishedScope string      `json:"published_scope"`
+	SortOrder      string      `json:"sort_order"`
+	TemplateSuffix string      `json:"template_suffix"`
+	Title          string      `json:"title"`
+	UpdatedAt      *time.Time  `json:"updated_at,omitempty"`
+	Rules          []Rule      `json:"rules"`
 
 	api *API
 }
 
 type CollectionOptions struct {
-	Handle    string `url:"handle,omitempty"`
-	IDs       string `url:"ids,omitempty"`
-	Limit     int    `url:"limit,omitempty"`
-	Page      int    `url:"page,omitempty"`
-	ProductID string `url:"product_id,omitempty"`
+	Handle          string `url:"handle,omitempty"`
+	IDs             string `url:"ids,omitempty"`
+	Limit           int    `url:"limit,omitempty"`
+	Page            int    `url:"page,omitempty"`
+	ProductID       string `url:"product_id,omitempty"`
+	UpdatedAtMin    string `url:"updated_at_min,omitempty"`
+	UpdatedAtMax    string `url:"updated_at_max,omitempty"`
+	PublishedAtMin  string `url:"published_at_min,omitempty"`
+	PublishedAtMax  string `url:"published_at_max,omitempty"`
+	PublishedStatus string `url:"published_status,omitempty"`
+	Title           string `url:"title,omitempty"`
 }
 
 func (api *API) SmartCollections() ([]SmartCollection, error) {

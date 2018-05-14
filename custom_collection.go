@@ -2,36 +2,23 @@ package shopify
 
 import (
 	"bytes"
-
 	"encoding/json"
-
 	"fmt"
-
 	"time"
 )
 
 type CustomCollection struct {
-	BodyHTML string `json:"body_html"`
-
-	Handle string `json:"handle"`
-
-	ID int64 `json:"id"`
-
-	Image interface{} `json:"image,omitempty"`
-
-	PublishedAt *time.Time `json:"published_at,omitempty"`
-
-	PublishedScope string `json:"published_scope"`
-
-	SortOrder string `json:"sort_order"`
-
-	TemplateSuffix string `json:"template_suffix"`
-
-	Title string `json:"title"`
-
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
-
-	api *API
+	BodyHTML       string      `json:"body_html"`
+	Handle         string      `json:"handle"`
+	ID             int64       `json:"id"`
+	Image          interface{} `json:"image,omitempty"`
+	PublishedAt    *time.Time  `json:"published_at,omitempty"`
+	PublishedScope string      `json:"published_scope"`
+	SortOrder      string      `json:"sort_order"`
+	TemplateSuffix string      `json:"template_suffix"`
+	Title          string      `json:"title"`
+	UpdatedAt      *time.Time  `json:"updated_at,omitempty"`
+	api            *API
 }
 
 func (api *API) CustomCollections() ([]CustomCollection, error) {

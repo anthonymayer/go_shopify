@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/google/go-querystring/query"
+	"github.com/json-iterator/go"
 )
 
 type Product struct {
@@ -55,7 +56,6 @@ type ProductsOptions struct {
 }
 
 func (api *API) Products(options *ProductsOptions) ([]*Product, error) {
-
 	qs := encodeOptions(options)
 	endpoint := fmt.Sprintf("/admin/products.json?%v", qs)
 	res, status, err := api.request(endpoint, "GET", nil, nil)
@@ -69,14 +69,17 @@ func (api *API) Products(options *ProductsOptions) ([]*Product, error) {
 	}
 
 	r := &map[string][]*Product{}
-	err = json.NewDecoder(res).Decode(r)
+	err = jsoniter.ConfigFastest.NewDecoder(res).Decode(r)
 	if err != nil {
 		return nil, err
 	}
 
 	result := (*r)["products"]
-	for _, v := range result {
-		v.api = api
+	for _, p := range result {
+		p.api = api
+		for i := range p.Variants {
+			p.Variants[i].api = api
+		}
 	}
 
 	return result, nil
@@ -111,7 +114,7 @@ func (api *API) ProductsCount(options *ProductsCountOptions) (int, error) {
 	}
 
 	r := map[string]interface{}{}
-	err = json.NewDecoder(res).Decode(&r)
+	err = jsoniter.ConfigFastest.NewDecoder(res).Decode(&r)
 
 	result, _ := strconv.Atoi(fmt.Sprintf("%v", r["count"]))
 	if err != nil {
@@ -134,7 +137,7 @@ func (api *API) Product(id int64) (*Product, error) {
 	}
 
 	r := map[string]Product{}
-	err = json.NewDecoder(res).Decode(&r)
+	err = jsoniter.ConfigFastest.NewDecoder(res).Decode(&r)
 
 	result := r["product"]
 
@@ -151,26 +154,30 @@ func (api *API) NewProduct() *Product {
 	return &Product{api: api}
 }
 
-type ProductsMetafieldsOptions struct {
+type MetafieldsOptions struct {
 	Limit        int    `url:"limit,omitempty"`
 	SinceID      string `url:"since_id,omitempty"`
 	CreatedAtMin string `url:"created_at_min,omitempty"`
 	CreatedAtMax string `url:"created_at_max,omitempty"`
 	UpdatedAtMin string `url:"updated_at_min,omitempty"`
 	UpdatedAtMax string `url:"updated_at_max,omitempty"`
-	Namepace     string `url:"namepace,omitempty"`
+	Namespace    string `url:"namespace,omitempty"`
 	Key          string `url:"key,omitempty"`
 	ValueType    string `url:"value_type,omitempty"`
 	Fields       string `url:"fields,omitempty"`
 }
 
-func (obj *Product) Metafields(options *ProductsMetafieldsOptions) ([]*Metafield, error) {
+func (obj *Product) Metafields(options *MetafieldsOptions) ([]*Metafield, error) {
 	if obj == nil || obj.api == nil {
 		return nil, errors.New("Product is nil")
 	}
+	return obj.api.ProductMetafields(obj.ID, options)
+}
+
+func (api *API) ProductMetafields(productID int64, options *MetafieldsOptions) ([]*Metafield, error) {
 	qs := encodeOptions(options)
-	endpoint := fmt.Sprintf("/admin/products/%d/metafields.json?%v", obj.ID, qs)
-	res, status, err := obj.api.request(endpoint, "GET", nil, nil)
+	endpoint := fmt.Sprintf("/admin/products/%d/metafields.json?%v", productID, qs)
+	res, status, err := api.request(endpoint, "GET", nil, nil)
 
 	if err != nil {
 		return nil, err
@@ -181,7 +188,7 @@ func (obj *Product) Metafields(options *ProductsMetafieldsOptions) ([]*Metafield
 	}
 
 	r := map[string][]*Metafield{}
-	err = json.NewDecoder(res).Decode(&r)
+	err = jsoniter.ConfigFastest.NewDecoder(res).Decode(&r)
 
 	result := r["metafields"]
 
@@ -190,7 +197,7 @@ func (obj *Product) Metafields(options *ProductsMetafieldsOptions) ([]*Metafield
 	}
 
 	for _, v := range result {
-		v.api = obj.api
+		v.api = api
 	}
 
 	return result, nil
@@ -279,11 +286,17 @@ func (obj *Product) Save(partial *Product) error {
 	}
 
 	if status != expectedStatus {
-		return newErrorResponse(status, nil, res)
+		r := errorResponse{}
+		err = json.NewDecoder(res).Decode(&r)
+		if err == nil {
+			return fmt.Errorf("Status %d: %v", status, r.Errors)
+		}
+
+		return fmt.Errorf("Status %d, and error parsing body: %s", status, err)
 	}
 
 	r := map[string]Product{}
-	err = json.NewDecoder(res).Decode(&r)
+	err = jsoniter.ConfigFastest.NewDecoder(res).Decode(&r)
 
 	if err != nil {
 		return err
@@ -308,7 +321,13 @@ func (obj *Product) Delete() error {
 	}
 
 	if status != expectedStatus {
-		return newErrorResponse(status, nil, res)
+		r := errorResponse{}
+		err = jsoniter.ConfigFastest.NewDecoder(res).Decode(&r)
+		if err == nil {
+			return fmt.Errorf("Status %d: %v", status, r.Errors)
+		}
+
+		return fmt.Errorf("Status %d, and error parsing body: %s", status, err)
 	}
 
 	return nil

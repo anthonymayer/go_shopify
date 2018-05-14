@@ -2,40 +2,50 @@ package shopify
 
 import (
 	"bytes"
-
 	"encoding/json"
-
 	"fmt"
-
 	"time"
 )
 
 type Page struct {
-	Author string `json:"author"`
-
-	BodyHtml string `json:"body_html"`
-
-	CreatedAt time.Time `json:"created_at"`
-
-	Handle string `json:"handle"`
-
-	Id int64 `json:"id"`
-
-	PublishedAt time.Time `json:"published_at"`
-
-	ShopId int64 `json:"shop_id"`
-
-	TemplateSuffix string `json:"template_suffix"`
-
-	Title string `json:"title"`
-
-	UpdatedAt time.Time `json:"updated_at"`
+	Author         string    `json:"author"`
+	BodyHTML       string    `json:"body_html"`
+	CreatedAt      time.Time `json:"created_at"`
+	Handle         string    `json:"handle"`
+	ID             int64     `json:"id"`
+	PublishedAt    time.Time `json:"published_at"`
+	ShopID         int64     `json:"shop_id"`
+	TemplateSuffix string    `json:"template_suffix"`
+	Title          string    `json:"title"`
+	UpdatedAt      time.Time `json:"updated_at"`
 
 	api *API
 }
 
+type PageOptions struct {
+	Limit           int    `url:"limit,omitempty"`
+	Page            int    `url:"page,omitempty"`
+	SinceID         int64  `url:"since_id,omitempty"`
+	Title           string `url:"title,omitempty"`
+	Handle          string `url:"handle,omitempty"`
+	CreatedAtMin    string `url:"created_at_min,omitempty"`
+	CreatedAtMax    string `url:"created_at_max,omitempty"`
+	UpdatedAtMin    string `url:"updated_at_min,omitempty"`
+	UpdatedAtMax    string `url:"updated_at_max,omitempty"`
+	PublishedAtMin  string `url:"published_at_min,omitempty"`
+	PublishedAtMax  string `url:"published_at_max,omitempty"`
+	PublishedStatus string `url:"published_status,omitempty"`
+	Fields          string `url:"fields,omitempty"`
+}
+
 func (api *API) Pages() ([]Page, error) {
-	res, status, err := api.request("/admin/pages.json", "GET", nil, nil)
+	return api.PagesWithOptions(&PageOptions{})
+}
+
+func (api *API) PagesWithOptions(options *PageOptions) ([]Page, error) {
+	qs := encodeOptions(options)
+	endpoint := fmt.Sprintf("/admin/pages.json?%v", qs)
+	res, status, err := api.request(endpoint, "GET", nil, nil)
 
 	if err != nil {
 		return nil, err
@@ -93,11 +103,11 @@ func (api *API) NewPage() *Page {
 }
 
 func (obj *Page) Save() error {
-	endpoint := fmt.Sprintf("/admin/pages/%d.json", obj.Id)
+	endpoint := fmt.Sprintf("/admin/pages/%d.json", obj.ID)
 	method := "PUT"
 	expectedStatus := 201
 
-	if obj.Id == 0 {
+	if obj.ID == 0 {
 		endpoint = fmt.Sprintf("/admin/pages.json")
 		method = "POST"
 		expectedStatus = 201

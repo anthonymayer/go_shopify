@@ -2,44 +2,63 @@ package shopify
 
 import (
 	"bytes"
-
 	"encoding/json"
-
 	"fmt"
-
+	"strconv"
 	"time"
+
+	jsoniter "github.com/json-iterator/go"
 )
 
 type Article struct {
-	Author string `json:"author"`
-
-	BlogId int64 `json:"blog_id"`
-
-	BodyHtml string `json:"body_html"`
-
-	CreatedAt time.Time `json:"created_at"`
-
-	Id int64 `json:"id"`
-
-	PublishedAt time.Time `json:"published_at"`
-
-	SummaryHtml string `json:"summary_html"`
-
-	TemplateSuffix string `json:"template_suffix"`
-
-	Title string `json:"title"`
-
-	UpdatedAt time.Time `json:"updated_at"`
-
-	UserId int64 `json:"user_id"`
-
-	Tags string `json:"tags"`
+	Author         string       `json:"author"`
+	BlogID         int64        `json:"blog_id"`
+	BodyHTML       string       `json:"body_html"`
+	CreatedAt      time.Time    `json:"created_at"`
+	Handle         string       `json:"handle,omitempty"`
+	ID             int64        `json:"id"`
+	Image          articleImage `json:"image,omitempty"`
+	PublishedAt    time.Time    `json:"published_at"`
+	SummaryHTML    string       `json:"summary_html"`
+	TemplateSuffix string       `json:"template_suffix"`
+	Title          string       `json:"title"`
+	UpdatedAt      time.Time    `json:"updated_at"`
+	UserID         int64        `json:"user_id"`
+	Tags           string       `json:"tags"`
 
 	api *API
 }
 
+type ArticleOptions struct {
+	Author          string `url:"author,omitempty"`
+	Handle          string `url:"handle,omitempty"`
+	Limit           int    `url:"limit,omitempty"`
+	Page            int    `url:"page,omitempty"`
+	CreatedAtMin    string `url:"created_at_min,omitempty"`
+	CreatedAtMax    string `url:"created_at_max,omitempty"`
+	UpdatedAtMin    string `url:"updated_at_min,omitempty"`
+	UpdatedAtMax    string `url:"updated_at_max,omitempty"`
+	PublishedAtMin  string `url:"published_at_min,omitempty"`
+	PublishedAtMax  string `url:"published_at_max,omitempty"`
+	PublishedStatus string `url:"published_status,omitempty"`
+	Order           string `url:"order,omitempty"`
+	SinceID         string `url:"since_id,omitempty"`
+	Tag             string `url:"tag,omitempty"`
+}
+
+type articleImage struct {
+	Src       string `json:"src,omitempty"`
+	CreatedAt string `json:"created_at,omitempty`
+}
+
 func (api *API) Articles() ([]Article, error) {
-	res, status, err := api.request("/admin/articles.json", "GET", nil, nil)
+	return api.ArticlesWithOptions(&ArticleOptions{})
+}
+
+func (api *API) ArticlesWithOptions(options *ArticleOptions) ([]Article, error) {
+	qs := encodeOptions(options)
+	endpoint := fmt.Sprintf("/admin/articles.json?%v", qs)
+	res, status, err := api.request(endpoint, "GET", nil, nil)
 
 	if err != nil {
 		return nil, err
@@ -62,6 +81,70 @@ func (api *API) Articles() ([]Article, error) {
 		v.api = api
 	}
 
+	return result, nil
+}
+
+func (api *API) BlogArticlesWithOptions(blogID int64, options *ArticleOptions) ([]Article, error) {
+	qs := encodeOptions(options)
+	endpoint := fmt.Sprintf("/admin/blogs/%d/articles.json?%v", blogID, qs)
+	res, status, err := api.request(endpoint, "GET", nil, nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if status != 200 {
+		return nil, fmt.Errorf("Status returned: %d", status)
+	}
+
+	r := &map[string][]Article{}
+	err = json.NewDecoder(res).Decode(r)
+
+	result := (*r)["articles"]
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range result {
+		v.api = api
+	}
+
+	return result, nil
+}
+
+type BlogArticlesCountOptions struct {
+	CreatedAtMin    string `url:"created_at_min,omitempty"`
+	CreatedAtMax    string `url:"created_at_max,omitempty"`
+	UpdatedAtMin    string `url:"updated_at_min,omitempty"`
+	UpdatedAtMax    string `url:"updated_at_max,omitempty"`
+	PublishedAtMin  string `url:"published_at_min,omitempty"`
+	PublishedAtMax  string `url:"published_at_max,omitempty"`
+	PublishedStatus string `url:"published_status,omitempty"`
+}
+
+func (api *API) BlogArticlesCount(blogID int64, options *BlogArticlesCountOptions) (int, error) {
+
+	qs := encodeOptions(options)
+	endpoint := fmt.Sprintf("/admin/blogs/%d/articles/count.json?%v", blogID, qs)
+
+	res, status, err := api.request(endpoint, "GET", nil, nil)
+
+	if err != nil {
+		return 0, err
+	}
+
+	if status != 200 {
+		return 0, fmt.Errorf("Status returned: %d", status)
+	}
+
+	r := map[string]interface{}{}
+	err = jsoniter.ConfigFastest.NewDecoder(res).Decode(&r)
+
+	result, _ := strconv.Atoi(fmt.Sprintf("%v", r["count"]))
+	if err != nil {
+		return 0, err
+	}
 	return result, nil
 }
 
@@ -97,11 +180,11 @@ func (api *API) NewArticle() *Article {
 }
 
 func (obj *Article) Save() error {
-	endpoint := fmt.Sprintf("/admin/articles/%d.json", obj.Id)
+	endpoint := fmt.Sprintf("/admin/articles/%d.json", obj.ID)
 	method := "PUT"
 	expectedStatus := 201
 
-	if obj.Id == 0 {
+	if obj.ID == 0 {
 		endpoint = fmt.Sprintf("/admin/articles.json")
 		method = "POST"
 		expectedStatus = 201
@@ -124,7 +207,13 @@ func (obj *Article) Save() error {
 	}
 
 	if status != expectedStatus {
-		return newErrorResponse(status, nil, res)
+		r := errorResponse{}
+		err = json.NewDecoder(res).Decode(&r)
+		if err == nil {
+			return fmt.Errorf("Status %d: %v", status, r.Errors)
+		}
+
+		return fmt.Errorf("Status %d, and error parsing body: %s", status, err)
 	}
 
 	r := map[string]Article{}

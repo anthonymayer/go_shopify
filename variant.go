@@ -1,8 +1,8 @@
 package shopify
 
 import (
-	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 )
 
@@ -15,7 +15,7 @@ type Variant struct {
 	Weight               float64     `json:"weight,omitempty"`
 	WeightUnit           string      `json:"weight_unit,omitempty"`
 	ID                   int64       `json:"id,omitempty"`
-	InventoryManagement  *string     `json:"inventory_management,omitempty"`
+	InventoryManagement  string      `json:"inventory_management,omitempty"`
 	InventoryPolicy      string      `json:"inventory_policy,omitempty"`
 	InventoryQuantity    int64       `json:"inventory_quantity"`
 	InventoryItemID      int64       `json:"inventory_item_id"`
@@ -76,4 +76,37 @@ func (obj *Variant) Save() error {
 	obj.api = api
 
 	return nil
+}
+
+func (obj *Variant) Metafields(options *MetafieldsOptions) ([]*Metafield, error) {
+	if obj == nil || obj.api == nil {
+		return nil, errors.New("Variant is nil")
+	}
+	qs := encodeOptions(options)
+	endpoint := fmt.Sprintf("/admin/variants/%d/metafields.json?%v", obj.ID, qs)
+	res, status, err := obj.api.request(endpoint, "GET", nil, nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if status != 200 {
+		return nil, fmt.Errorf("Status returned: %d", status)
+	}
+
+	r := map[string][]*Metafield{}
+	err = json.NewDecoder(res).Decode(&r)
+
+	result := r["metafields"]
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range result {
+		v.api = obj.api
+	}
+
+	return result, nil
+
 }
