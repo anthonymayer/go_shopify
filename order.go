@@ -8,61 +8,61 @@ import (
 )
 
 type Order struct {
-	BuyerAcceptsMarketing bool           `json:"buyer_accepts_marketing"`
-	CancelReason          string         `json:"cancel_reason"`
-	CancelledAt           string         `json:"cancelled_at"`
-	CartToken             string         `json:"cart_token"`
-	CheckoutToken         string         `json:"checkout_token"`
-	ClosedAt              string         `json:"closed_at"`
-	Confirmed             bool           `json:"confirmed"`
-	CreatedAt             time.Time      `json:"created_at"`
-	Currency              string         `json:"currency"`
-	Email                 string         `json:"email"`
-	FinancialStatus       string         `json:"financial_status"`
-	FulfillmentStatus     string         `json:"fulfillment_status"`
-	Gateway               string         `json:"gateway"`
-	Id                    int64          `json:"id"`
-	LandingSite           string         `json:"landing_site"`
-	LocationId            string         `json:"location_id"`
-	Name                  string         `json:"name"`
-	Note                  string         `json:"note"`
-	Number                int64          `json:"number"`
-	ProcessedAt           time.Time      `json:"processed_at"`
-	Reference             string         `json:"reference"`
-	ReferringSite         string         `json:"referring_site"`
-	SourceIdentifier      string         `json:"source_identifier"`
-	SourceName            string         `json:"source_name"`
-	SourceUrl             string         `json:"source_url"`
-	SubtotalPrice         time.Time      `json:"subtotal_price"`
-	TaxesIncluded         bool           `json:"taxes_included"`
-	Test                  bool           `json:"test"`
-	Token                 string         `json:"token"`
-	TotalDiscounts        string         `json:"total_discounts"`
-	TotalLineItemsPrice   time.Time      `json:"total_line_items_price"`
-	TotalPrice            time.Time      `json:"total_price"`
-	TotalPriceUsd         string         `json:"total_price_usd"`
-	TotalTax              string         `json:"total_tax"`
-	TotalWeight           int64          `json:"total_weight"`
-	UpdatedAt             time.Time      `json:"updated_at"`
-	UserId                string         `json:"user_id"`
-	BrowserIp             string         `json:"browser_ip"`
-	LandingSiteRef        string         `json:"landing_site_ref"`
-	OrderNumber           int64          `json:"order_number"`
-	DiscountCodes         []interface{}  `json:"discount_codes"`
-	NoteAttributes        []interface{}  `json:"note_attributes"`
-	ProcessingMethod      string         `json:"processing_method"`
-	Source                string         `json:"source"`
-	CheckoutId            int64          `json:"checkout_id"`
-	TaxLines              []interface{}  `json:"tax_lines"`
-	Tags                  string         `json:"tags"`
-	LineItems             []LineItem     `json:"line_items"`
-	ShippingLines         []ShippingLine `json:"shipping_lines"`
-	BillingAddress        BillingAddress `json:"billing_address"`
-	ShippingAddress       BillingAddress `json:"shipping_address"`
-	Fulfillments          []interface{}  `json:"fulfillments"`
-	ClientDetails         ClientDetail   `json:"client_details"`
-	Refunds               []interface{}  `json:"refunds"`
-	Customer              Customer       `json:"customer"`
+	BuyerAcceptsMarketing bool           `json:"buyer_accepts_marketing,omitempty"`
+	CancelReason          string         `json:"cancel_reason,omitempty"`
+	CancelledAt           string         `json:"cancelled_at,omitempty"`
+	CartToken             string         `json:"cart_token,omitempty"`
+	CheckoutToken         string         `json:"checkout_token,omitempty"`
+	ClosedAt              string         `json:"closed_at,omitempty"`
+	Confirmed             bool           `json:"confirmed,omitempty"`
+	CreatedAt             time.Time      `json:"created_at,omitempty"`
+	Currency              string         `json:"currency,omitempty"`
+	Email                 string         `json:"email,omitempty"`
+	FinancialStatus       string         `json:"financial_status,omitempty"`
+	FulfillmentStatus     string         `json:"fulfillment_status,omitempty"`
+	Gateway               string         `json:"gateway,omitempty"`
+	Id                    int64          `json:"id,omitempty"`
+	LandingSite           string         `json:"landing_site,omitempty"`
+	LocationId            string         `json:"location_id,omitempty"`
+	Name                  string         `json:"name,omitempty"`
+	Note                  string         `json:"note,omitempty"`
+	Number                int64          `json:"number,omitempty"`
+	ProcessedAt           time.Time      `json:"processed_at,omitempty"`
+	Reference             string         `json:"reference,omitempty"`
+	ReferringSite         string         `json:"referring_site,omitempty"`
+	SourceIdentifier      string         `json:"source_identifier,omitempty"`
+	SourceName            string         `json:"source_name,omitempty"`
+	SourceUrl             string         `json:"source_url,omitempty"`
+	SubtotalPrice         time.Time      `json:"subtotal_price,omitempty"`
+	TaxesIncluded         bool           `json:"taxes_included,omitempty"`
+	Test                  bool           `json:"test,omitempty"`
+	Token                 string         `json:"token,omitempty"`
+	TotalDiscounts        string         `json:"total_discounts,omitempty"`
+	TotalLineItemsPrice   time.Time      `json:"total_line_items_price,omitempty"`
+	TotalPrice            time.Time      `json:"total_price,omitempty"`
+	TotalPriceUsd         string         `json:"total_price_usd,omitempty"`
+	TotalTax              string         `json:"total_tax,omitempty"`
+	TotalWeight           int64          `json:"total_weight,omitempty"`
+	UpdatedAt             time.Time      `json:"updated_at,omitempty"`
+	UserId                string         `json:"user_id,omitempty"`
+	BrowserIp             string         `json:"browser_ip,omitempty"`
+	LandingSiteRef        string         `json:"landing_site_ref,omitempty"`
+	OrderNumber           int64          `json:"order_number,omitempty"`
+	DiscountCodes         []interface{}  `json:"discount_codes,omitempty"`
+	NoteAttributes        []interface{}  `json:"note_attributes,omitempty"`
+	ProcessingMethod      string         `json:"processing_method,omitempty"`
+	Source                string         `json:"source,omitempty"`
+	CheckoutId            int64          `json:"checkout_id,omitempty"`
+	TaxLines              []interface{}  `json:"tax_lines,omitempty"`
+	Tags                  string         `json:"tags,omitempty"`
+	LineItems             []LineItem     `json:"line_items,omitempty"`
+	ShippingLines         []ShippingLine `json:"shipping_lines,omitempty"`
+	BillingAddress        BillingAddress `json:"billing_address,omitempty"`
+	ShippingAddress       BillingAddress `json:"shipping_address,omitempty"`
+	Fulfillments          []interface{}  `json:"fulfillments,omitempty"`
+	ClientDetails         ClientDetail   `json:"client_details,omitempty"`
+	Refunds               []interface{}  `json:"refunds,omitempty"`
+	Customer              Customer       `json:"customer,omitempty"`
 
 	api *API
 }
@@ -103,6 +103,9 @@ func (api *API) OrdersWithOptions(options *OrderOptions) ([]Order, error) {
 	result := (*r)["orders"]
 
 	if err != nil {
+		fmt.Printf("%+v\n", err)
+		resStr := res.String()
+		fmt.Println(resStr)
 		return nil, err
 	}
 

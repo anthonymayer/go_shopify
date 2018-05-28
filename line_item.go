@@ -5,39 +5,22 @@ import (
 )
 
 type LineItem struct {
-	AppliedDiscounts []interface{} `json:"applied_discounts"`
-
-	CompareAtPrice string `json:"compare_at_price"`
-
-	FulfillmentService string `json:"fulfillment_service"`
-
-	GiftCard bool `json:"gift_card"`
-
-	Grams int64 `json:"grams"`
-
-	LinePrice time.Time `json:"line_price"`
-
-	Price string `json:"price"`
-
-	ProductId int64 `json:"product_id"`
-
-	Properties string `json:"properties"`
-
-	Quantity int64 `json:"quantity"`
-
-	RequiresShipping bool `json:"requires_shipping"`
-
-	Sku string `json:"sku"`
-
-	TaxLines []interface{} `json:"tax_lines"`
-
-	Taxable bool `json:"taxable"`
-
-	Title string `json:"title"`
-
-	VariantId int64 `json:"variant_id"`
-
-	VariantTitle string `json:"variant_title"`
-
-	Vendor string `json:"vendor"`
+	AppliedDiscounts   []interface{} `json:"applied_discounts,omitempty"`
+	CompareAtPrice     string        `json:"compare_at_price,omitempty"`
+	FulfillmentService string        `json:"fulfillment_service,omitempty"`
+	GiftCard           bool          `json:"gift_card,omitempty"`
+	Grams              int64         `json:"grams,omitempty"`
+	LinePrice          time.Time     `json:"line_price,omitempty"`
+	Price              string        `json:"price,omitempty"`
+	ProductId          int64         `json:"product_id,omitempty"`
+	Properties         string        `json:"properties,omitempty"`
+	Quantity           int64         `json:"quantity,omitempty"`
+	RequiresShipping   bool          `json:"requires_shipping,omitempty"`
+	Sku                string        `json:"sku,omitempty"`
+	TaxLines           []interface{} `json:"tax_lines,omitempty"`
+	Taxable            bool          `json:"taxable,omitempty"`
+	Title              string        `json:"title,omitempty"`
+	VariantId          int64         `json:"variant_id,omitempty"`
+	VariantTitle       string        `json:"variant_title,omitempty"`
+	Vendor             string        `json:"vendor,omitempty"`
 }
