@@ -1,16 +1,12 @@
 package shopify
 
-import (
-	"time"
-)
-
 type LineItem struct {
 	AppliedDiscounts   []interface{} `json:"applied_discounts,omitempty"`
 	CompareAtPrice     string        `json:"compare_at_price,omitempty"`
 	FulfillmentService string        `json:"fulfillment_service,omitempty"`
 	GiftCard           bool          `json:"gift_card,omitempty"`
 	Grams              int64         `json:"grams,omitempty"`
-	LinePrice          time.Time     `json:"line_price,omitempty"`
+	LinePrice          string        `json:"line_price,omitempty"`
 	Price              string        `json:"price,omitempty"`
 	ProductId          int64         `json:"product_id,omitempty"`
 	Properties         string        `json:"properties,omitempty"`

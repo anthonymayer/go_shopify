@@ -41,17 +41,17 @@ type Checkout struct {
 
 	SourceUrl string `json:"source_url"`
 
-	SubtotalPrice time.Time `json:"subtotal_price"`
+	SubtotalPrice string `json:"subtotal_price"`
 
 	TaxesIncluded bool `json:"taxes_included"`
 
-	Token time.Time `json:"token"`
+	Token string `json:"token"`
 
 	TotalDiscounts string `json:"total_discounts"`
 
-	TotalLineItemsPrice time.Time `json:"total_line_items_price"`
+	TotalLineItemsPrice string `json:"total_line_items_price"`
 
-	TotalPrice time.Time `json:"total_price"`
+	TotalPrice string `json:"total_price"`
 
 	TotalTax string `json:"total_tax"`
 

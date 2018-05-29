@@ -1,9 +1,5 @@
 package shopify
 
-import (
-	"time"
-)
-
 type WeightBasedShippingRate struct {
 	CountryId int64 `json:"country_id"`
 
@@ -11,7 +7,7 @@ type WeightBasedShippingRate struct {
 
 	Name string `json:"name"`
 
-	Price time.Time `json:"price"`
+	Price string `json:"price"`
 
 	WeightHigh float64 `json:"weight_high"`
 

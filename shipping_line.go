@@ -1,13 +1,9 @@
 package shopify
 
-import (
-	"time"
-)
-
 type ShippingLine struct {
 	Code string `json:"code"`
 
-	Price time.Time `json:"price"`
+	Price string `json:"price"`
 
 	Source string `json:"source"`
 

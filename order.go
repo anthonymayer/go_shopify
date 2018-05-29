@@ -33,13 +33,13 @@ type Order struct {
 	SourceIdentifier      string         `json:"source_identifier,omitempty"`
 	SourceName            string         `json:"source_name,omitempty"`
 	SourceUrl             string         `json:"source_url,omitempty"`
-	SubtotalPrice         time.Time      `json:"subtotal_price,omitempty"`
+	SubtotalPrice         string         `json:"subtotal_price,omitempty"`
 	TaxesIncluded         bool           `json:"taxes_included,omitempty"`
 	Test                  bool           `json:"test,omitempty"`
 	Token                 string         `json:"token,omitempty"`
 	TotalDiscounts        string         `json:"total_discounts,omitempty"`
-	TotalLineItemsPrice   time.Time      `json:"total_line_items_price,omitempty"`
-	TotalPrice            time.Time      `json:"total_price,omitempty"`
+	TotalLineItemsPrice   string         `json:"total_line_items_price,omitempty"`
+	TotalPrice            string         `json:"total_price,omitempty"`
 	TotalPriceUsd         string         `json:"total_price_usd,omitempty"`
 	TotalTax              string         `json:"total_tax,omitempty"`
 	TotalWeight           int64          `json:"total_weight,omitempty"`
@@ -103,9 +103,6 @@ func (api *API) OrdersWithOptions(options *OrderOptions) ([]Order, error) {
 	result := (*r)["orders"]
 
 	if err != nil {
-		fmt.Printf("%+v\n", err)
-		resStr := res.String()
-		fmt.Println(resStr)
 		return nil, err
 	}
 
