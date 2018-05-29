@@ -23,7 +23,7 @@ type Customer struct {
 
 	LastName string `json:"last_name"`
 
-	LastOrderId string `json:"last_order_id"`
+	LastOrderId int64 `json:"last_order_id"`
 
 	MultipassIdentifier string `json:"multipass_identifier"`
 

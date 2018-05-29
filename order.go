@@ -23,7 +23,7 @@ type Order struct {
 	Gateway               string         `json:"gateway,omitempty"`
 	Id                    int64          `json:"id,omitempty"`
 	LandingSite           string         `json:"landing_site,omitempty"`
-	LocationId            string         `json:"location_id,omitempty"`
+	LocationId            int64          `json:"location_id,omitempty"`
 	Name                  string         `json:"name,omitempty"`
 	Note                  string         `json:"note,omitempty"`
 	Number                int64          `json:"number,omitempty"`
@@ -44,7 +44,7 @@ type Order struct {
 	TotalTax              string         `json:"total_tax,omitempty"`
 	TotalWeight           int64          `json:"total_weight,omitempty"`
 	UpdatedAt             time.Time      `json:"updated_at,omitempty"`
-	UserId                string         `json:"user_id,omitempty"`
+	UserId                int64          `json:"user_id,omitempty"`
 	BrowserIp             string         `json:"browser_ip,omitempty"`
 	LandingSiteRef        string         `json:"landing_site_ref,omitempty"`
 	OrderNumber           int64          `json:"order_number,omitempty"`
