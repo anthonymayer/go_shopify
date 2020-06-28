@@ -59,7 +59,7 @@ func (api *API) ArticlesWithOptions(options *ArticleOptions) ([]Article, *Pages,
 }
 
 func (api *API) BlogArticlesWithOptions(blogID int64, options *ArticleOptions) ([]Article, *Pages, error) {
-	return api.getArticlesWithOptions(fmt.Sprintf("BASE_PATH/blogs/%d/articles.json?", blogID), options)
+	return api.getArticlesWithOptions(fmt.Sprintf("BASE_PATH/blogs/%d/articles.json", blogID), options)
 }
 
 func (api *API) getArticlesWithOptions(path string, options *ArticleOptions) ([]Article, *Pages, error) {
@@ -70,7 +70,10 @@ func (api *API) getArticlesWithOptions(path string, options *ArticleOptions) ([]
 }
 
 func (api *API) ArticlesFromPages(pages *Pages) ([]Article, *Pages, error) {
-	return api.processArticlesResponse(api.getNextPage(pages))
+	if pages.hasNextPage() {
+		return api.processArticlesResponse(api.getNextPage(pages))
+	}
+	return nil, &Pages{}, fmt.Errorf("No next page")
 }
 
 func (api *API) processArticlesResponse(res *bytes.Buffer, status int, pages *Pages, err error) ([]Article, *Pages, error) {

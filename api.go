@@ -52,23 +52,34 @@ type Pages struct {
 	nextPage string
 }
 
+func (pages *Pages) hasNextPage() bool {
+	return pages.nextPage != ""
+}
+
+func (pages *Pages) hasPrevPage() bool {
+	return pages.prevPage != ""
+}
+
 func (api *API) getNextPage(pages *Pages) (result *bytes.Buffer, status int, p *Pages, err error) {
 	return api.baseRequest(pages.nextPage, "GET", nil, nil)
 }
 
-func NewPages(linkHeader string) *Pages {
-	newPages := &Pages{}
+func NewPages(linkHeader string) (pages *Pages) {
+	pages = &Pages{}
+	if linkHeader == "" {
+		return
+	}
 	rels := strings.Split(linkHeader, ",")
 	for _, rel := range rels {
 		pieces := strings.Split(rel, ";")
-		// dir := pieces[1][4:len(pieces[1])]
-		if pieces[1] == "rel=next" {
-			newPages.nextPage = pieces[0]
+		link := strings.Trim(pieces[0], " <>")
+		if strings.TrimSpace(pieces[1]) == "rel=\"next\"" {
+			pages.nextPage = link
 		} else {
-			newPages.prevPage = pieces[0]
+			pages.prevPage = link
 		}
 	}
-	return newPages
+	return pages
 }
 
 func (api *API) request(endpoint string, method string, params map[string]interface{}, body io.Reader) (result *bytes.Buffer, status int, err error) {
@@ -128,8 +139,6 @@ func (api *API) baseRequest(uri string, method string, params map[string]interfa
 	if err != nil {
 		return
 	}
-
-	fmt.Println(resp.Header)
 
 	pages = NewPages(resp.Header.Get("Link"))
 

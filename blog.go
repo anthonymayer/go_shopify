@@ -35,7 +35,7 @@ func (api *API) Blogs() ([]Blog, error) {
 
 func (api *API) BlogsWithOptions(options *BlogOptions) ([]Blog, error) {
 	qs := encodeOptions(options)
-	endpoint := fmt.Sprintf("/admin/blogs.json?%v", qs)
+	endpoint := fmt.Sprintf("BASE_PATH/blogs.json?%v", qs)
 	res, status, err := api.request(endpoint, "GET", nil, nil)
 
 	if err != nil {
@@ -63,7 +63,7 @@ func (api *API) BlogsWithOptions(options *BlogOptions) ([]Blog, error) {
 }
 
 func (api *API) Blog(id int64) (*Blog, error) {
-	endpoint := fmt.Sprintf("/admin/blogs/%d.json", id)
+	endpoint := fmt.Sprintf("BASE_PATH/blogs/%d.json", id)
 
 	res, status, err := api.request(endpoint, "GET", nil, nil)
 
@@ -94,12 +94,12 @@ func (api *API) NewBlog() *Blog {
 }
 
 func (obj *Blog) Save() error {
-	endpoint := fmt.Sprintf("/admin/blogs/%d.json", obj.ID)
+	endpoint := fmt.Sprintf("BASE_PATH/blogs/%d.json", obj.ID)
 	method := "PUT"
 	expectedStatus := 201
 
 	if obj.ID == 0 {
-		endpoint = fmt.Sprintf("/admin/blogs.json")
+		endpoint = fmt.Sprintf("BASE_PATH/blogs.json")
 		method = "POST"
 		expectedStatus = 201
 	}
