@@ -55,11 +55,11 @@ func (api *API) Articles() ([]Article, *Pages, error) {
 }
 
 func (api *API) ArticlesWithOptions(options *ArticleOptions) ([]Article, *Pages, error) {
-	return api.getArticlesWithOptions("/admin/articles.json", options)
+	return api.getArticlesWithOptions("BASE_PATH/articles.json", options)
 }
 
 func (api *API) BlogArticlesWithOptions(blogID int64, options *ArticleOptions) ([]Article, *Pages, error) {
-	return api.getArticlesWithOptions(fmt.Sprintf("/admin/blogs/%d/articles.json?", blogID), options)
+	return api.getArticlesWithOptions(fmt.Sprintf("BASE_PATH/blogs/%d/articles.json?", blogID), options)
 }
 
 func (api *API) getArticlesWithOptions(path string, options *ArticleOptions) ([]Article, *Pages, error) {
@@ -111,7 +111,7 @@ type BlogArticlesCountOptions struct {
 func (api *API) BlogArticlesCount(blogID int64, options *BlogArticlesCountOptions) (int, error) {
 
 	qs := encodeOptions(options)
-	endpoint := fmt.Sprintf("/admin/blogs/%d/articles/count.json?%v", blogID, qs)
+	endpoint := fmt.Sprintf("BASE_PATH/blogs/%d/articles/count.json?%v", blogID, qs)
 
 	res, status, err := api.request(endpoint, "GET", nil, nil)
 
@@ -134,7 +134,7 @@ func (api *API) BlogArticlesCount(blogID int64, options *BlogArticlesCountOption
 }
 
 func (api *API) Article(id int64) (*Article, error) {
-	endpoint := fmt.Sprintf("/admin/articles/%d.json", id)
+	endpoint := fmt.Sprintf("BASE_PATH/articles/%d.json", id)
 
 	res, status, err := api.request(endpoint, "GET", nil, nil)
 
@@ -165,12 +165,12 @@ func (api *API) NewArticle() *Article {
 }
 
 func (obj *Article) Save() error {
-	endpoint := fmt.Sprintf("/admin/articles/%d.json", obj.ID)
+	endpoint := fmt.Sprintf("BASE_PATH/articles/%d.json", obj.ID)
 	method := "PUT"
 	expectedStatus := 201
 
 	if obj.ID == 0 {
-		endpoint = fmt.Sprintf("/admin/articles.json")
+		endpoint = fmt.Sprintf("BASE_PATH/articles.json")
 		method = "POST"
 		expectedStatus = 201
 	}

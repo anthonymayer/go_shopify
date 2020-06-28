@@ -15,6 +15,7 @@ import (
 const REFILL_RATE = float64(0.5) // 2 per second
 const BUCKET_LIMIT = 40
 const MAX_RETRIES = 3
+const BASE_PATH = "/admin/api/%v"
 
 type API struct {
 	Shop         string // for e.g. demo-3.myshopify.com
@@ -23,6 +24,7 @@ type API struct {
 	Secret       string // API client secret for this shop
 	RetryLimit   int
 	LogRetryFail bool
+	APIVersion   string
 
 	// map[endpoint:method]response
 	RequestCache RequestCache
@@ -56,7 +58,6 @@ func (api *API) getNextPage(pages *Pages) (result *bytes.Buffer, status int, p *
 
 func NewPages(linkHeader string) *Pages {
 	newPages := &Pages{}
-	fmt.Println(linkHeader)
 	rels := strings.Split(linkHeader, ",")
 	for _, rel := range rels {
 		pieces := strings.Split(rel, ";")
@@ -102,6 +103,15 @@ func (api *API) baseRequest(uri string, method string, params map[string]interfa
 		api.callLimit = BUCKET_LIMIT
 	}
 
+	switch api.APIVersion {
+	case "":
+		api.APIVersion = "2020-04" // current stable release
+	case "2020-07", "2020-04", "2020-01", "2019-10", "2019-07", "2019-04": // valid do nothing
+	default:
+		fmt.Println("unknown API version")
+	}
+	uri = strings.Replace(uri, "BASE_PATH", fmt.Sprintf(BASE_PATH, api.APIVersion), 1)
+
 	req, err := http.NewRequest(method, uri, body)
 	if err != nil {
 		return
@@ -118,6 +128,8 @@ func (api *API) baseRequest(uri string, method string, params map[string]interfa
 	if err != nil {
 		return
 	}
+
+	fmt.Println(resp.Header)
 
 	pages = NewPages(resp.Header.Get("Link"))
 
