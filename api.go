@@ -45,12 +45,46 @@ type RequestCache interface {
 	Set(string, *bytes.Buffer)
 }
 
+type Pages struct {
+	prevPage string
+	nextPage string
+}
+
+func (api *API) getNextPage(pages *Pages) (result *bytes.Buffer, status int, p *Pages, err error) {
+	return api.baseRequest(pages.nextPage, "GET", nil, nil)
+}
+
+func NewPages(linkHeader string) *Pages {
+	newPages := &Pages{}
+	fmt.Println(linkHeader)
+	rels := strings.Split(linkHeader, ",")
+	for _, rel := range rels {
+		pieces := strings.Split(rel, ";")
+		// dir := pieces[1][4:len(pieces[1])]
+		if pieces[1] == "rel=next" {
+			newPages.nextPage = pieces[0]
+		} else {
+			newPages.prevPage = pieces[0]
+		}
+	}
+	return newPages
+}
+
 func (api *API) request(endpoint string, method string, params map[string]interface{}, body io.Reader) (result *bytes.Buffer, status int, err error) {
-	if api.RequestCache != nil && api.RequestCache.Contains(endpoint+":"+method) {
+	result, status, _, err = api.requestWithPagination(endpoint, method, params, body)
+	return
+}
+
+func (api *API) requestWithPagination(endpoint string, method string, params map[string]interface{}, body io.Reader) (result *bytes.Buffer, status int, pages *Pages, err error) {
+	return api.baseRequest(fmt.Sprintf("https://%s%s", api.Shop, endpoint), method, params, body)
+}
+
+func (api *API) baseRequest(uri string, method string, params map[string]interface{}, body io.Reader) (result *bytes.Buffer, status int, pages *Pages, err error) {
+	if api.RequestCache != nil && api.RequestCache.Contains(uri+":"+method) {
 		// make a copy so that the original object doesn't get emptied
-		cachedBuffer := api.RequestCache.Get(endpoint + ":" + method)
+		cachedBuffer := api.RequestCache.Get(uri + ":" + method)
 		if cachedBuffer.Len() > 0 {
-			return bytes.NewBuffer(cachedBuffer.Bytes()), 200, nil
+			return bytes.NewBuffer(cachedBuffer.Bytes()), 200, &Pages{}, nil
 		}
 	}
 	if api.client == nil {
@@ -68,7 +102,6 @@ func (api *API) request(endpoint string, method string, params map[string]interf
 		api.callLimit = BUCKET_LIMIT
 	}
 
-	uri := fmt.Sprintf("https://%s%s", api.Shop, endpoint)
 	req, err := http.NewRequest(method, uri, body)
 	if err != nil {
 		return
@@ -86,6 +119,8 @@ func (api *API) request(endpoint string, method string, params map[string]interf
 		return
 	}
 
+	pages = NewPages(resp.Header.Get("Link"))
+
 	calls, total := parseAPICallLimit(resp.Header.Get("HTTP_X_SHOPIFY_SHOP_API_CALL_LIMIT"))
 	api.callsMade = calls
 	api.callLimit = total
@@ -100,7 +135,7 @@ func (api *API) request(endpoint string, method string, params map[string]interf
 			b := api.backoff.Duration()
 			time.Sleep(b)
 			// try again
-			return api.request(endpoint, method, params, body)
+			return api.baseRequest(uri, method, params, body)
 		}
 		if api.LogRetryFail {
 			fmt.Println(
@@ -123,7 +158,7 @@ func (api *API) request(endpoint string, method string, params map[string]interf
 		params == nil &&
 		body == nil &&
 		api.RequestCache != nil {
-		api.RequestCache.Set(endpoint+":"+method, bytes.NewBuffer(result.Bytes()))
+		api.RequestCache.Set(uri+":"+method, bytes.NewBuffer(result.Bytes()))
 	}
 	return
 }

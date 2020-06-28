@@ -33,7 +33,6 @@ type ArticleOptions struct {
 	Author          string `url:"author,omitempty"`
 	Handle          string `url:"handle,omitempty"`
 	Limit           int    `url:"limit,omitempty"`
-	Page            int    `url:"page,omitempty"`
 	CreatedAtMin    string `url:"created_at_min,omitempty"`
 	CreatedAtMax    string `url:"created_at_max,omitempty"`
 	UpdatedAtMin    string `url:"updated_at_min,omitempty"`
@@ -51,50 +50,36 @@ type articleImage struct {
 	CreatedAt string `json:"created_at,omitempty`
 }
 
-func (api *API) Articles() ([]Article, error) {
+func (api *API) Articles() ([]Article, *Pages, error) {
 	return api.ArticlesWithOptions(&ArticleOptions{})
 }
 
-func (api *API) ArticlesWithOptions(options *ArticleOptions) ([]Article, error) {
-	qs := encodeOptions(options)
-	endpoint := fmt.Sprintf("/admin/articles.json?%v", qs)
-	res, status, err := api.request(endpoint, "GET", nil, nil)
-
-	if err != nil {
-		return nil, err
-	}
-
-	if status != 200 {
-		return nil, fmt.Errorf("Status returned: %d", status)
-	}
-
-	r := &map[string][]Article{}
-	err = json.NewDecoder(res).Decode(r)
-
-	result := (*r)["articles"]
-
-	if err != nil {
-		return nil, err
-	}
-
-	for _, v := range result {
-		v.api = api
-	}
-
-	return result, nil
+func (api *API) ArticlesWithOptions(options *ArticleOptions) ([]Article, *Pages, error) {
+	return api.getArticlesWithOptions("/admin/articles.json", options)
 }
 
-func (api *API) BlogArticlesWithOptions(blogID int64, options *ArticleOptions) ([]Article, error) {
-	qs := encodeOptions(options)
-	endpoint := fmt.Sprintf("/admin/blogs/%d/articles.json?%v", blogID, qs)
-	res, status, err := api.request(endpoint, "GET", nil, nil)
+func (api *API) BlogArticlesWithOptions(blogID int64, options *ArticleOptions) ([]Article, *Pages, error) {
+	return api.getArticlesWithOptions(fmt.Sprintf("/admin/blogs/%d/articles.json?", blogID), options)
+}
 
+func (api *API) getArticlesWithOptions(path string, options *ArticleOptions) ([]Article, *Pages, error) {
+	qs := encodeOptions(options)
+	endpoint := fmt.Sprintf("%v?%v", path, qs)
+
+	return api.processArticlesResponse(api.requestWithPagination(endpoint, "GET", nil, nil))
+}
+
+func (api *API) ArticlesFromPages(pages *Pages) ([]Article, *Pages, error) {
+	return api.processArticlesResponse(api.getNextPage(pages))
+}
+
+func (api *API) processArticlesResponse(res *bytes.Buffer, status int, pages *Pages, err error) ([]Article, *Pages, error) {
 	if err != nil {
-		return nil, err
+		return nil, pages, err
 	}
 
 	if status != 200 {
-		return nil, fmt.Errorf("Status returned: %d", status)
+		return nil, pages, fmt.Errorf("Status returned: %d", status)
 	}
 
 	r := &map[string][]Article{}
@@ -103,14 +88,14 @@ func (api *API) BlogArticlesWithOptions(blogID int64, options *ArticleOptions) (
 	result := (*r)["articles"]
 
 	if err != nil {
-		return nil, err
+		return nil, pages, err
 	}
 
 	for _, v := range result {
 		v.api = api
 	}
 
-	return result, nil
+	return result, pages, nil
 }
 
 type BlogArticlesCountOptions struct {
