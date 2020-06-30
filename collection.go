@@ -2,15 +2,12 @@ package shopify
 
 import (
 	"bytes"
-
 	"encoding/json"
-
 	"fmt"
-
 	"time"
 )
 
-type SmartCollection struct {
+type Collection struct {
 	BodyHTML       string      `json:"body_html"`
 	Disjunctive    bool        `json:"disjunctive"`
 	Handle         string      `json:"handle"`
@@ -27,13 +24,27 @@ type SmartCollection struct {
 	api *API
 }
 
-func (api *API) SmartCollections() ([]SmartCollection, error) {
-	return api.SmartCollectionsWithOptions(&CollectionOptions{})
+type CollectionOptions struct {
+	Handle          string `url:"handle,omitempty"`
+	IDs             string `url:"ids,omitempty"`
+	Limit           int    `url:"limit,omitempty"`
+	Page            int    `url:"page,omitempty"`
+	ProductID       string `url:"product_id,omitempty"`
+	UpdatedAtMin    string `url:"updated_at_min,omitempty"`
+	UpdatedAtMax    string `url:"updated_at_max,omitempty"`
+	PublishedAtMin  string `url:"published_at_min,omitempty"`
+	PublishedAtMax  string `url:"published_at_max,omitempty"`
+	PublishedStatus string `url:"published_status,omitempty"`
+	Title           string `url:"title,omitempty"`
 }
 
-func (api *API) SmartCollectionsWithOptions(options *CollectionOptions) ([]SmartCollection, error) {
+func (api *API) Collections() ([]Collection, error) {
+	return api.CollectionsWithOptions(&CollectionOptions{})
+}
+
+func (api *API) CollectionsWithOptions(options *CollectionOptions) ([]Collection, error) {
 	qs := encodeOptions(options)
-	endpoint := fmt.Sprintf("/admin/smart_collections.json?%v", qs)
+	endpoint := fmt.Sprintf("BASE_PATH/collection.json?%v", qs)
 	res, status, err := api.request(endpoint, "GET", nil, nil)
 
 	if err != nil {
@@ -44,10 +55,10 @@ func (api *API) SmartCollectionsWithOptions(options *CollectionOptions) ([]Smart
 		return nil, fmt.Errorf("Status returned: %d", status)
 	}
 
-	r := &map[string][]SmartCollection{}
+	r := &map[string][]Collection{}
 	err = json.NewDecoder(res).Decode(r)
 
-	result := (*r)["smart_collections"]
+	result := (*r)["collection"]
 
 	if err != nil {
 		return nil, err
@@ -60,8 +71,8 @@ func (api *API) SmartCollectionsWithOptions(options *CollectionOptions) ([]Smart
 	return result, nil
 }
 
-func (api *API) SmartCollection(id int64) (*SmartCollection, error) {
-	endpoint := fmt.Sprintf("/admin/smart_collections/%d.json", id)
+func (api *API) Collection(id int64) (*Collection, error) {
+	endpoint := fmt.Sprintf("BASE_PATH/collection/%d.json", id)
 
 	res, status, err := api.request(endpoint, "GET", nil, nil)
 
@@ -73,9 +84,9 @@ func (api *API) SmartCollection(id int64) (*SmartCollection, error) {
 		return nil, fmt.Errorf("Status returned: %d", status)
 	}
 
-	r := map[string]SmartCollection{}
+	r := map[string]Collection{}
 	err = json.NewDecoder(res).Decode(&r)
-	result := r["smart_collection"]
+	result := r["collection"]
 
 	if err != nil {
 		return nil, err
@@ -86,23 +97,32 @@ func (api *API) SmartCollection(id int64) (*SmartCollection, error) {
 	return &result, nil
 }
 
-func (api *API) NewSmartCollection() *SmartCollection {
-	return &SmartCollection{api: api}
+func (api *API) CollectionProducts(collectionID int64, limit int) ([]*Product, *Pages, error) {
+	endpoint := fmt.Sprintf("BASE_PATH/collection/%d/products.json?limit=%d", collectionID, limit)
+
+	res, status, pages, err := api.requestWithPagination(endpoint, "GET", nil, nil)
+
+	products, err := api.processProductsResponse(res, status, err)
+	return products, pages, err
 }
 
-func (obj *SmartCollection) Save() error {
-	endpoint := fmt.Sprintf("/admin/smart_collections/%d.json", obj.ID)
+func (api *API) NewCollection() *Collection {
+	return &Collection{api: api}
+}
+
+func (obj *Collection) Save() error {
+	endpoint := fmt.Sprintf("BASE_PATH/collection/%d.json", obj.ID)
 	method := "PUT"
 	expectedStatus := 201
 
 	if obj.ID == 0 {
-		endpoint = fmt.Sprintf("/admin/smart_collections.json")
+		endpoint = fmt.Sprintf("BASE_PATH/collection.json")
 		method = "POST"
 		expectedStatus = 201
 	}
 
-	body := map[string]*SmartCollection{}
-	body["smart_collection"] = obj
+	body := map[string]*Collection{}
+	body["collection"] = obj
 
 	buf := &bytes.Buffer{}
 	err := json.NewEncoder(buf).Encode(body)
@@ -127,14 +147,14 @@ func (obj *SmartCollection) Save() error {
 		return fmt.Errorf("Status %d, and error parsing body: %s", status, err)
 	}
 
-	r := map[string]SmartCollection{}
+	r := map[string]Collection{}
 	err = json.NewDecoder(res).Decode(&r)
 
 	if err != nil {
 		return err
 	}
 
-	*obj = r["smart_collection"]
+	*obj = r["collection"]
 
 	return nil
 }

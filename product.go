@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	"github.com/google/go-querystring/query"
-	"github.com/json-iterator/go"
+	jsoniter "github.com/json-iterator/go"
 )
 
 type Product struct {
@@ -51,11 +51,24 @@ type ProductsOptions struct {
 	Fields          string `url:"fields,omitempty"`
 }
 
-func (api *API) Products(options *ProductsOptions) ([]*Product, error) {
+func (api *API) Products(options *ProductsOptions) ([]*Product, *Pages, error) {
 	qs := encodeOptions(options)
 	endpoint := fmt.Sprintf("/admin/products.json?%v", qs)
-	res, status, err := api.request(endpoint, "GET", nil, nil)
+	res, status, pages, err := api.requestWithPagination(endpoint, "GET", nil, nil)
+	products, err := api.processProductsResponse(res, status, err)
+	return products, pages, err
+}
 
+func (api *API) ProductsFromPages(pages *Pages) ([]*Product, *Pages, error) {
+	if pages.HasNextPage() {
+		res, status, pages, err := api.getNextPage(pages)
+		products, err := api.processProductsResponse(res, status, err)
+		return products, pages, err
+	}
+	return nil, &Pages{}, fmt.Errorf("No next page")
+}
+
+func (api *API) processProductsResponse(res *bytes.Buffer, status int, err error) ([]*Product, error) {
 	if err != nil {
 		return nil, err
 	}

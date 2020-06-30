@@ -52,11 +52,11 @@ type Pages struct {
 	nextPage string
 }
 
-func (pages *Pages) hasNextPage() bool {
+func (pages *Pages) HasNextPage() bool {
 	return pages.nextPage != ""
 }
 
-func (pages *Pages) hasPrevPage() bool {
+func (pages *Pages) HasPrevPage() bool {
 	return pages.prevPage != ""
 }
 

@@ -70,7 +70,7 @@ func (api *API) getArticlesWithOptions(path string, options *ArticleOptions) ([]
 }
 
 func (api *API) ArticlesFromPages(pages *Pages) ([]Article, *Pages, error) {
-	if pages.hasNextPage() {
+	if pages.HasNextPage() {
 		return api.processArticlesResponse(api.getNextPage(pages))
 	}
 	return nil, &Pages{}, fmt.Errorf("No next page")
