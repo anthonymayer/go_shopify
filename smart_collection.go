@@ -33,7 +33,7 @@ func (api *API) SmartCollections() ([]SmartCollection, error) {
 
 func (api *API) SmartCollectionsWithOptions(options *CollectionOptions) ([]SmartCollection, error) {
 	qs := encodeOptions(options)
-	endpoint := fmt.Sprintf("/admin/smart_collections.json?%v", qs)
+	endpoint := fmt.Sprintf("BASE_PATH/smart_collections.json?%v", qs)
 	res, status, err := api.request(endpoint, "GET", nil, nil)
 
 	if err != nil {
@@ -61,7 +61,7 @@ func (api *API) SmartCollectionsWithOptions(options *CollectionOptions) ([]Smart
 }
 
 func (api *API) SmartCollection(id int64) (*SmartCollection, error) {
-	endpoint := fmt.Sprintf("/admin/smart_collections/%d.json", id)
+	endpoint := fmt.Sprintf("BASE_PATH/smart_collections/%d.json", id)
 
 	res, status, err := api.request(endpoint, "GET", nil, nil)
 
@@ -91,12 +91,12 @@ func (api *API) NewSmartCollection() *SmartCollection {
 }
 
 func (obj *SmartCollection) Save() error {
-	endpoint := fmt.Sprintf("/admin/smart_collections/%d.json", obj.ID)
+	endpoint := fmt.Sprintf("BASE_PATH/smart_collections/%d.json", obj.ID)
 	method := "PUT"
 	expectedStatus := 201
 
 	if obj.ID == 0 {
-		endpoint = fmt.Sprintf("/admin/smart_collections.json")
+		endpoint = fmt.Sprintf("BASE_PATH/smart_collections.json")
 		method = "POST"
 		expectedStatus = 201
 	}

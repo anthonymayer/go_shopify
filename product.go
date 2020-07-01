@@ -53,7 +53,7 @@ type ProductsOptions struct {
 
 func (api *API) Products(options *ProductsOptions) ([]*Product, *Pages, error) {
 	qs := encodeOptions(options)
-	endpoint := fmt.Sprintf("/admin/products.json?%v", qs)
+	endpoint := fmt.Sprintf("BASE_PATH/products.json?%v", qs)
 	res, status, pages, err := api.requestWithPagination(endpoint, "GET", nil, nil)
 	products, err := api.processProductsResponse(res, status, err)
 	return products, pages, err
@@ -110,7 +110,7 @@ type ProductsCountOptions struct {
 func (api *API) ProductsCount(options *ProductsCountOptions) (int, error) {
 
 	qs := encodeOptions(options)
-	endpoint := fmt.Sprintf("/admin/products/count.json?%v", qs)
+	endpoint := fmt.Sprintf("BASE_PATH/products/count.json?%v", qs)
 
 	res, status, err := api.request(endpoint, "GET", nil, nil)
 
@@ -133,7 +133,7 @@ func (api *API) ProductsCount(options *ProductsCountOptions) (int, error) {
 }
 
 func (api *API) Product(id int64) (*Product, error) {
-	endpoint := fmt.Sprintf("/admin/products/%d.json", id)
+	endpoint := fmt.Sprintf("BASE_PATH/products/%d.json", id)
 
 	res, status, err := api.request(endpoint, "GET", nil, nil)
 
@@ -185,7 +185,7 @@ func (obj *Product) Metafields(options *MetafieldsOptions) ([]*Metafield, error)
 
 func (api *API) ProductMetafields(productID int64, options *MetafieldsOptions) ([]*Metafield, error) {
 	qs := encodeOptions(options)
-	endpoint := fmt.Sprintf("/admin/products/%d/metafields.json?%v", productID, qs)
+	endpoint := fmt.Sprintf("BASE_PATH/products/%d/metafields.json?%v", productID, qs)
 	res, status, err := api.request(endpoint, "GET", nil, nil)
 
 	if err != nil {
@@ -213,12 +213,12 @@ func (api *API) ProductMetafields(productID int64, options *MetafieldsOptions) (
 }
 
 //func (obj *Product) Save() error {
-//	endpoint := fmt.Sprintf("/admin/products/%d.json", obj.Id)
+//	endpoint := fmt.Sprintf("BASE_PATH/products/%d.json", obj.Id)
 //	method := "PUT"
 //	expectedStatus := 200
 //
 //	if obj.Id == 0 {
-//		endpoint = fmt.Sprintf("/admin/products.json")
+//		endpoint = fmt.Sprintf("BASE_PATH/products.json")
 //		method = "POST"
 //		expectedStatus = 201
 //	}
@@ -264,12 +264,12 @@ func (api *API) ProductMetafields(productID int64, options *MetafieldsOptions) (
 //}
 
 func (obj *Product) Save(partial *Product) error {
-	endpoint := fmt.Sprintf("/admin/products/%d.json", obj.ID)
+	endpoint := fmt.Sprintf("BASE_PATH/products/%d.json", obj.ID)
 	method := "PUT"
 	expectedStatus := 200
 
 	if obj.ID == 0 {
-		endpoint = fmt.Sprintf("/admin/products.json")
+		endpoint = fmt.Sprintf("BASE_PATH/products.json")
 		method = "POST"
 		expectedStatus = 201
 	}
@@ -319,7 +319,7 @@ func (obj *Product) Save(partial *Product) error {
 }
 
 func (obj *Product) Delete() error {
-	endpoint := fmt.Sprintf("/admin/products/%d.json", obj.ID)
+	endpoint := fmt.Sprintf("BASE_PATH/products/%d.json", obj.ID)
 	method := "DELETE"
 	expectedStatus := 200
 

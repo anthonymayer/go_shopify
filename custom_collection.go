@@ -27,7 +27,7 @@ func (api *API) CustomCollections() ([]CustomCollection, error) {
 
 func (api *API) CustomCollectionsWithOptions(options *CollectionOptions) ([]CustomCollection, error) {
 	qs := encodeOptions(options)
-	endpoint := fmt.Sprintf("/admin/custom_collections.json?%v", qs)
+	endpoint := fmt.Sprintf("BASE_PATH/custom_collections.json?%v", qs)
 	res, status, err := api.request(endpoint, "GET", nil, nil)
 
 	if err != nil {
@@ -55,7 +55,7 @@ func (api *API) CustomCollectionsWithOptions(options *CollectionOptions) ([]Cust
 }
 
 func (api *API) CustomCollection(id int64) (*CustomCollection, error) {
-	endpoint := fmt.Sprintf("/admin/custom_collections/%d.json", id)
+	endpoint := fmt.Sprintf("BASE_PATH/custom_collections/%d.json", id)
 
 	res, status, err := api.request(endpoint, "GET", nil, nil)
 
@@ -86,12 +86,12 @@ func (api *API) NewCustomCollection() *CustomCollection {
 }
 
 func (obj *CustomCollection) Save() error {
-	endpoint := fmt.Sprintf("/admin/custom_collections/%d.json", obj.ID)
+	endpoint := fmt.Sprintf("BASE_PATH/custom_collections/%d.json", obj.ID)
 	method := "PUT"
 	expectedStatus := 201
 
 	if obj.ID == 0 {
-		endpoint = fmt.Sprintf("/admin/custom_collections.json")
+		endpoint = fmt.Sprintf("BASE_PATH/custom_collections.json")
 		method = "POST"
 		expectedStatus = 201
 	}
