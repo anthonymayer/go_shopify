@@ -13,6 +13,7 @@ type Collection struct {
 	Handle         string      `json:"handle"`
 	ID             int64       `json:"id"`
 	Image          interface{} `json:"image,omitempty"`
+	ProductsCount  int         `json:"products_count"`
 	PublishedAt    *time.Time  `json:"published_at,omitempty"`
 	PublishedScope string      `json:"published_scope"`
 	SortOrder      string      `json:"sort_order"`
