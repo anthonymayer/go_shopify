@@ -72,7 +72,7 @@ func (api *API) CollectionsWithOptions(options *CollectionOptions) ([]Collection
 }
 
 func (api *API) Collection(id int64) (*Collection, error) {
-	endpoint := fmt.Sprintf("BASE_PATH/collection/%d.json", id)
+	endpoint := fmt.Sprintf("BASE_PATH/collections/%d.json", id)
 
 	res, status, err := api.request(endpoint, "GET", nil, nil)
 
@@ -98,7 +98,7 @@ func (api *API) Collection(id int64) (*Collection, error) {
 }
 
 func (api *API) CollectionProducts(collectionID int64, limit int) ([]*Product, *Pages, error) {
-	endpoint := fmt.Sprintf("BASE_PATH/collection/%d/products.json?limit=%d", collectionID, limit)
+	endpoint := fmt.Sprintf("BASE_PATH/collections/%d/products.json?limit=%d", collectionID, limit)
 
 	res, status, pages, err := api.requestWithPagination(endpoint, "GET", nil, nil)
 
@@ -111,7 +111,7 @@ func (api *API) NewCollection() *Collection {
 }
 
 func (obj *Collection) Save() error {
-	endpoint := fmt.Sprintf("BASE_PATH/collection/%d.json", obj.ID)
+	endpoint := fmt.Sprintf("BASE_PATH/collections/%d.json", obj.ID)
 	method := "PUT"
 	expectedStatus := 201
 
