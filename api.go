@@ -116,8 +116,8 @@ func (api *API) baseRequest(uri string, method string, params map[string]interfa
 
 	switch api.APIVersion {
 	case "":
-		api.APIVersion = "2020-04" // current stable release
-	case "2020-07", "2020-04", "2020-01", "2019-10", "2019-07", "2019-04": // valid do nothing
+		api.APIVersion = "2021-07" // current stable release
+	case "2021-07", "2021-04", "2021-01", "2020-10": // valid do nothing
 	default:
 		fmt.Println("unknown API version")
 	}
